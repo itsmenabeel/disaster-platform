@@ -228,6 +228,93 @@ const styles = {
     color: 'var(--text-secondary)',
     lineHeight: 1.5,
   },
+  uploadZone: {
+    border: '2px dashed var(--border)',
+    borderRadius: 'var(--radius)',
+    padding: '28px 20px',
+    textAlign: 'center',
+    cursor: 'pointer',
+    transition: 'border-color var(--transition), background var(--transition)',
+    background: 'var(--bg-input)',
+    display: 'block',
+  },
+  uploadIcon: {
+    fontSize: '2rem',
+    marginBottom: '8px',
+    lineHeight: 1,
+  },
+  uploadText: {
+    fontSize: '0.9rem',
+    color: 'var(--text-secondary)',
+    marginBottom: '4px',
+  },
+  uploadHint: {
+    fontSize: '0.72rem',
+    color: 'var(--text-muted)',
+    fontFamily: 'IBM Plex Mono, monospace',
+    letterSpacing: '0.04em',
+  },
+  fileGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+    gap: '10px',
+    marginTop: '14px',
+  },
+  fileCard: {
+    position: 'relative',
+    background: 'var(--bg-elevated)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius)',
+    overflow: 'hidden',
+  },
+  fileThumb: {
+    width: '100%',
+    height: '80px',
+    objectFit: 'cover',
+    display: 'block',
+  },
+  videoThumb: {
+    width: '100%',
+    height: '80px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'var(--bg-elevated)',
+    fontSize: '2rem',
+  },
+  fileMeta: {
+    padding: '6px 8px',
+  },
+  fileName: {
+    fontSize: '0.7rem',
+    color: 'var(--text-secondary)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  fileSize: {
+    fontSize: '0.65rem',
+    color: 'var(--text-muted)',
+    fontFamily: 'IBM Plex Mono, monospace',
+  },
+  removeFileBtn: {
+    position: 'absolute',
+    top: '4px',
+    right: '4px',
+    width: '20px',
+    height: '20px',
+    borderRadius: '50%',
+    background: 'rgba(230,57,70,0.85)',
+    border: 'none',
+    color: '#fff',
+    fontSize: '0.65rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    padding: 0,
+    lineHeight: 1,
+  },
 };
 
 const CreateSOS = () => {
@@ -239,6 +326,9 @@ const CreateSOS = () => {
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mediaFiles, setMediaFiles]       = useState([]); // File objects
+  const [mediaPreviews, setMediaPreviews] = useState([]); // { url, type, name, size }
+
 
   // Auto-fetch GPS on mount
   useEffect(() => {
@@ -267,23 +357,61 @@ const CreateSOS = () => {
     );
   };
 
+  const handleFileChange = (e) => {
+    const selected = Array.from(e.target.files);
+    if (mediaFiles.length + selected.length > 5) {
+      setError('You can attach a maximum of 5 files.');
+      return;
+    }
+    const newFiles = [...mediaFiles, ...selected];
+    setMediaFiles(newFiles);
+    setMediaPreviews(
+      newFiles.map((f) => ({
+        url: URL.createObjectURL(f),
+        type: f.type,
+        name: f.name,
+        size: f.size,
+      }))
+    );
+    e.target.value = ''; // reset so the same file can be re-added after removal
+  };
+  
+  const removeFile = (index) => {
+    URL.revokeObjectURL(mediaPreviews[index].url); // free memory
+    setMediaFiles((prev)    => prev.filter((_, i) => i !== index));
+    setMediaPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+  
     if (needs.length === 0) return setError('Please select at least one need.');
     if (!coordinates) return setError('Location is required. Please allow GPS access.');
-
+  
     setLoading(true);
     try {
+      // Step 1 — create the SOS record
       const res = await api.post('/sos', { needs, description, coordinates, address });
-      navigate(`/victim/track/${res.data.data._id}`);
+      const sosId = res.data.data._id;
+  
+      // Step 2 — upload media if the user attached any files
+      if (mediaFiles.length > 0) {
+        const formData = new FormData();
+        mediaFiles.forEach((file) => formData.append('media', file));
+        // Do NOT set Content-Type manually — axios sets it with the correct multipart boundary
+        await api.put(`/sos/${sosId}/media`, formData);
+      }
+  
+      navigate(`/victim/track/${sosId}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send SOS. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
 
   const gpsStatusText = {
     idle:    { title: 'Detecting location...', coords: 'Waiting for GPS signal' },
@@ -389,7 +517,57 @@ const CreateSOS = () => {
               />
             </div>
           </div>
-
+          
+          {/* Section 4 - Media */}
+          <div style={styles.section}>
+            <div style={styles.sectionHeader}>
+              <div style={styles.sectionNum}>4</div>
+              <div style={styles.sectionTitle}>
+                Attach Photos / Videos{' '}
+                <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '0.85rem' }}>
+                  (optional · max 5)
+                </span>
+              </div>
+            </div>
+          
+            <label htmlFor="media-upload" style={styles.uploadZone}>
+              <div style={styles.uploadIcon}>📎</div>
+              <div style={styles.uploadText}>Click to select images or videos</div>
+              <div style={styles.uploadHint}>
+                JPG · PNG · GIF · MP4 · MOV · AVI &nbsp;·&nbsp; Max 50 MB each
+              </div>
+              <input
+                id="media-upload"
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/gif,video/mp4,video/quicktime,video/x-msvideo"
+                multiple
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+          
+            {mediaPreviews.length > 0 && (
+              <div style={styles.fileGrid}>
+                {mediaPreviews.map((file, i) => (
+                  <div key={i} style={styles.fileCard}>
+                    {file.type.startsWith('image/') ? (
+                      <img src={file.url} alt={file.name} style={styles.fileThumb} />
+                    ) : (
+                      <div style={styles.videoThumb}>🎥</div>
+                    )}
+                    <div style={styles.fileMeta}>
+                      <div style={styles.fileName}>{file.name}</div>
+                      <div style={styles.fileSize}>{(file.size / (1024 * 1024)).toFixed(1)} MB</div>
+                    </div>
+                    <button type="button" style={styles.removeFileBtn} onClick={() => removeFile(i)}>
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
           {/* Submit */}
           <div style={styles.submitSection}>
             {error && <div className="error-msg" style={{ marginBottom: '14px' }}>{error}</div>}

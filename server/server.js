@@ -12,6 +12,10 @@ const app = express();
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+const path = require('path');
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Routes
 app.use('/api/auth',          require('./routes/authRoutes'));
