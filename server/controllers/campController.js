@@ -1,4 +1,10 @@
 const Camp = require('../models/Camp');
+const Inventory = require('../models/Inventory');
+
+const buildLocation = (coordinates = []) => ({
+  type: 'Point',
+  coordinates: coordinates.map(Number),
+});
 
 // @desc    Get all camps for NGO
 // @route   GET /api/camps
@@ -6,7 +12,9 @@ const Camp = require('../models/Camp');
 const getCamps = async (req, res) => {
   try {
     const filter = req.user.role === 'admin' ? {} : { ngo: req.user._id };
-    const camps = await Camp.find(filter).populate('assignedVolunteers', 'name phone');
+    const camps = await Camp.find(filter)
+      .populate('assignedVolunteers', 'name phone')
+      .sort({ isActive: -1, updatedAt: -1 });
     res.json({ success: true, data: camps });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -18,13 +26,15 @@ const getCamps = async (req, res) => {
 // @access  Private (ngo)
 const createCamp = async (req, res) => {
   try {
-    const { name, coordinates, address, capacity } = req.body;
+    const { name, coordinates, address, capacity, currentOccupancy, isActive } = req.body;
     const camp = await Camp.create({
       ngo: req.user._id,
       name,
-      location: { type: 'Point', coordinates },
+      location: buildLocation(coordinates),
       address,
       capacity,
+      currentOccupancy,
+      isActive,
     });
     res.status(201).json({ success: true, data: camp });
   } catch (error) {
@@ -37,13 +47,39 @@ const createCamp = async (req, res) => {
 // @access  Private (ngo)
 const updateCamp = async (req, res) => {
   try {
+    const updateData = { ...req.body };
+
+    if (req.body.coordinates) {
+      updateData.location = buildLocation(req.body.coordinates);
+      delete updateData.coordinates;
+    }
+
     const camp = await Camp.findOneAndUpdate(
       { _id: req.params.id, ngo: req.user._id },
-      req.body,
-      { new: true }
+      updateData,
+      { new: true, runValidators: true }
     );
     if (!camp) return res.status(404).json({ success: false, message: 'Camp not found' });
     res.json({ success: true, data: camp });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete a camp
+// @route   DELETE /api/camps/:id
+// @access  Private (ngo)
+const deleteCamp = async (req, res) => {
+  try {
+    const camp = await Camp.findOneAndDelete({ _id: req.params.id, ngo: req.user._id });
+    if (!camp) return res.status(404).json({ success: false, message: 'Camp not found' });
+
+    await Inventory.updateMany(
+      { ngo: req.user._id, camp: camp._id },
+      { $set: { camp: null } }
+    );
+
+    res.json({ success: true, message: 'Camp deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -87,4 +123,11 @@ const unassignVolunteer = async (req, res) => {
   }
 };
 
-module.exports = { getCamps, createCamp, updateCamp, assignVolunteer, unassignVolunteer };
+module.exports = {
+  getCamps,
+  createCamp,
+  updateCamp,
+  deleteCamp,
+  assignVolunteer,
+  unassignVolunteer,
+};
