@@ -1,37 +1,38 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Landing
-import LandingPage from './pages/LandingPage';
+import LandingPage from "./pages/LandingPage";
 
 // Auth Pages
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 // Victim Pages
-import VictimDashboard from './pages/victim/VictimDashboard';
-import CreateSOS from './pages/victim/CreateSOS';
-import TrackRescue from './pages/victim/TrackRescue';
+import VictimDashboard from "./pages/victim/VictimDashboard";
+import CreateSOS from "./pages/victim/CreateSOS";
+import TrackRescue from "./pages/victim/TrackRescue";
 
 // Volunteer Pages
-import VolunteerDashboard from './pages/volunteer/VolunteerDashboard';
-import NearbyMap from './pages/volunteer/NearbyMap';
-import MyTasks from './pages/volunteer/MyTasks';
+import VolunteerDashboard from "./pages/volunteer/VolunteerDashboard";
+import NearbyMap from "./pages/volunteer/NearbyMap";
+import MyTasks from "./pages/volunteer/MyTasks";
+import SOSDetailPage from "./pages/volunteer/SOSDetailPage";
 
 // NGO Pages
-import NGODashboard from './pages/ngo/NGODashboard';
-import InventoryPage from './pages/ngo/InventoryPage';
-import CampsPage from './pages/ngo/CampsPage';
-import DistributionPage from './pages/ngo/DistributionPage';
+import NGODashboard from "./pages/ngo/NGODashboard";
+import InventoryPage from "./pages/ngo/InventoryPage";
+import CampsPage from "./pages/ngo/CampsPage";
+import DistributionPage from "./pages/ngo/DistributionPage";
 
 // Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import IncidentsPage from './pages/admin/IncidentsPage';
-import BroadcastPage from './pages/admin/BroadcastPage';
-import ReportsPage from './pages/admin/ReportsPage';
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import IncidentsPage from "./pages/admin/IncidentsPage";
+import BroadcastPage from "./pages/admin/BroadcastPage";
+import ReportsPage from "./pages/admin/ReportsPage";
 
 // Role-based protected route
 const ProtectedRoute = ({ children, roles }) => {
@@ -46,12 +47,12 @@ const ProtectedRoute = ({ children, roles }) => {
 const RoleRedirect = () => {
   const { user } = useAuth();
   const dashboards = {
-    victim: '/victim',
-    volunteer: '/volunteer',
-    ngo: '/ngo',
-    admin: '/admin',
+    victim: "/victim",
+    volunteer: "/volunteer",
+    ngo: "/ngo",
+    admin: "/admin",
   };
-  return <Navigate to={dashboards[user?.role] || '/login'} />;
+  return <Navigate to={dashboards[user?.role] || "/login"} />;
 };
 
 const App = () => (
@@ -68,29 +69,142 @@ const App = () => (
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Role redirect after login */}
-        <Route path="/dashboard" element={<ProtectedRoute><RoleRedirect /></ProtectedRoute>} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <RoleRedirect />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Victim routes */}
-        <Route path="/victim" element={<ProtectedRoute roles={['victim']}><VictimDashboard /></ProtectedRoute>} />
-        <Route path="/victim/sos" element={<ProtectedRoute roles={['victim']}><CreateSOS /></ProtectedRoute>} />
-        <Route path="/victim/track/:id" element={<ProtectedRoute roles={['victim']}><TrackRescue /></ProtectedRoute>} />
+        <Route
+          path="/victim"
+          element={
+            <ProtectedRoute roles={["victim"]}>
+              <VictimDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/victim/sos"
+          element={
+            <ProtectedRoute roles={["victim"]}>
+              <CreateSOS />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/victim/track/:id"
+          element={
+            <ProtectedRoute roles={["victim"]}>
+              <TrackRescue />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Volunteer routes */}
-        <Route path="/volunteer" element={<ProtectedRoute roles={['volunteer']}><VolunteerDashboard /></ProtectedRoute>} />
-        <Route path="/volunteer/map" element={<ProtectedRoute roles={['volunteer']}><NearbyMap /></ProtectedRoute>} />
-        <Route path="/volunteer/tasks" element={<ProtectedRoute roles={['volunteer']}><MyTasks /></ProtectedRoute>} />
+        <Route
+          path="/volunteer"
+          element={
+            <ProtectedRoute roles={["volunteer"]}>
+              <VolunteerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer/map"
+          element={
+            <ProtectedRoute roles={["volunteer"]}>
+              <NearbyMap />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer/tasks"
+          element={
+            <ProtectedRoute roles={["volunteer"]}>
+              <MyTasks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer/sos/:id"
+          element={
+            <ProtectedRoute roles={["volunteer"]}>
+              <SOSDetailPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* NGO routes */}
-        <Route path="/ngo" element={<ProtectedRoute roles={['ngo']}><NGODashboard /></ProtectedRoute>} />
-        <Route path="/ngo/inventory" element={<ProtectedRoute roles={['ngo']}><InventoryPage /></ProtectedRoute>} />
-        <Route path="/ngo/camps" element={<ProtectedRoute roles={['ngo']}><CampsPage /></ProtectedRoute>} />
-        <Route path="/ngo/distribution" element={<ProtectedRoute roles={['ngo']}><DistributionPage /></ProtectedRoute>} />
+        <Route
+          path="/ngo"
+          element={
+            <ProtectedRoute roles={["ngo"]}>
+              <NGODashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ngo/inventory"
+          element={
+            <ProtectedRoute roles={["ngo"]}>
+              <InventoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ngo/camps"
+          element={
+            <ProtectedRoute roles={["ngo"]}>
+              <CampsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ngo/distribution"
+          element={
+            <ProtectedRoute roles={["ngo"]}>
+              <DistributionPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Admin routes */}
-        <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/incidents" element={<ProtectedRoute roles={['admin']}><IncidentsPage /></ProtectedRoute>} />
-        <Route path="/admin/broadcast" element={<ProtectedRoute roles={['admin']}><BroadcastPage /></ProtectedRoute>} />
-        <Route path="/admin/reports" element={<ProtectedRoute roles={['admin']}><ReportsPage /></ProtectedRoute>} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/incidents"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <IncidentsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <BroadcastPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <ReportsPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
