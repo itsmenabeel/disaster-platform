@@ -276,6 +276,10 @@
     width: 230px;
     padding: 14px;
     font-family: "IBM Plex Sans", sans-serif;
+    box-sizing: border-box;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .nm-sos-tooltip__header {
@@ -325,6 +329,14 @@
     color: #8892a4;
     margin-bottom: 5px;
     line-height: 1.45;
+    overflow: hidden;
+}
+
+.nm-sos-tooltip__row > span:not(.nm-sos-tooltip__key) {
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    flex: 1;
 }
 
 .nm-sos-tooltip__key {

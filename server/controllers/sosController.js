@@ -140,7 +140,7 @@ const setPriority = async (req, res) => {
 // @access  Private (volunteer)
 const getNearbyRequests = async (req, res) => {
   try {
-    const { lng, lat, radius = 20000 } = req.query; // radius in meters
+    const { lng, lat, radius = 10000 } = req.query; // radius in meters
 
     const requests = await SOSRequest.find({
       status: "pending",
