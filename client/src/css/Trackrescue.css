@@ -69,6 +69,46 @@
     font-family: "IBM Plex Mono", monospace;
 }
 
+.tr-top-bar__right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.tr-top-bar__user {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 5px 12px 5px 6px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+}
+
+.tr-top-bar__user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.78rem;
+    font-family: "Oswald", sans-serif;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+}
+
+.tr-top-bar__user-name {
+    font-size: 0.78rem;
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
 .tr-back-btn {
     background: var(--bg-elevated);
     border: 1px solid var(--border);

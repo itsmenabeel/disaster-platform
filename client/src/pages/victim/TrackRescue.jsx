@@ -2,12 +2,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 import TopBar from "../../components/Topbar.jsx";
 import TimelineCard from "../../components/TimelineCard";
 import StatusVolunteerCards from "../../components/StatusVolunteerCards";
 import RequestDetailsCard from "../../components/RequestDetailsCard";
-import MediaCard from "../../components/MediaCard";
+import MediaCard from "../../components/Mediacard.jsx";
 import "../../css/TrackRescue.css";
 
 /* ─── Static config maps ─────────────────────────────────────────── */
@@ -78,6 +79,7 @@ const timeAgo = (dateStr) => {
 const TrackRescue = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [sos, setSos] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -112,7 +114,7 @@ const TrackRescue = () => {
   if (loading)
     return (
       <div className="tr-page">
-        <TopBar />
+        <TopBar user={user} />
         <div className="tr-centre-wrap">
           <span>Loading rescue status...</span>
         </div>
@@ -123,7 +125,11 @@ const TrackRescue = () => {
   if (error)
     return (
       <div className="tr-page">
-        <TopBar onBack={() => navigate("/victim")} />
+        <TopBar
+          user={user}
+          onBack={() => navigate("/victim")}
+          subtitle="VICTIM PORTAL — LIVE TRACKING"
+        />
         <div className="tr-centre-wrap">
           <div
             className="error-msg"
@@ -157,7 +163,11 @@ const TrackRescue = () => {
       </div>
 
       {/* Top bar */}
-      <TopBar onBack={() => navigate("/victim")} />
+      <TopBar
+        user={user}
+        onBack={() => navigate("/victim")}
+        subtitle="VICTIM PORTAL — LIVE TRACKING"
+      />
 
       {/* Main content */}
       <div className="tr-content">
