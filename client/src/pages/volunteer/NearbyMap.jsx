@@ -13,11 +13,11 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
 import useGPS from "../../hooks/useGPS.js";
-import TopBar from "../../components/Topbar.jsx";
 import ControlBar from "../../components/ControlBar.jsx";
 import MapOverlays from "../../components/Mapoverlays.jsx";
 import MapLegend from "../../components/Maplegend.jsx";
 import SosTooltip from "../../components/Sostooltip.jsx";
+import NavTopBar from "../../components/NavTopBar.jsx";
 import "../../css/NearbyMap.css";
 
 /* ─── Static config ──────────────────────────────────────────────── */
@@ -96,10 +96,10 @@ const NearbyMap = () => {
   return (
     <div className="nm-page">
       {/* Top bar */}
-      <TopBar
+      <NavTopBar
         user={user}
         onBack={() => navigate("/volunteer")}
-        subtitle="VOLUNTEER PORTAL — LIVE DISPATCH VIEW"
+        subtitle="VOLUNTEER PORTAL — RESCUE TASK VIEW"
       />
 
       <ControlBar

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import NavTopBar from "../../components/NavTopBar";
+import HeaderTag from "../../components/HeaderTag";
 
 /* ── Static config (same as NearbyMap) ── */
 const NEED_EMOJIS = {
@@ -15,17 +17,17 @@ const NEED_EMOJIS = {
 
 const PRIORITY = {
   critical: { color: "#e63946", label: "CRITICAL" },
-  high:     { color: "#e67e22", label: "HIGH"     },
-  medium:   { color: "#f39c12", label: "MEDIUM"   },
-  low:      { color: "#2ecc71", label: "LOW"       },
+  high: { color: "#e67e22", label: "HIGH" },
+  medium: { color: "#f39c12", label: "MEDIUM" },
+  low: { color: "#2ecc71", label: "LOW" },
 };
 
 const STATUS_CONFIG = {
-  pending:    { color: "#f39c12", label: "PENDING"      },
-  assigned:   { color: "#3498db", label: "ASSIGNED"     },
-  on_the_way: { color: "#9b59b6", label: "ON THE WAY"   },
-  rescued:    { color: "#2ecc71", label: "RESCUED"      },
-  closed:     { color: "#4a5260", label: "CLOSED"       },
+  pending: { color: "#f39c12", label: "PENDING" },
+  assigned: { color: "#3498db", label: "ASSIGNED" },
+  on_the_way: { color: "#9b59b6", label: "ON THE WAY" },
+  rescued: { color: "#2ecc71", label: "RESCUED" },
+  closed: { color: "#4a5260", label: "CLOSED" },
 };
 
 const timeAgo = (d) => {
@@ -99,13 +101,13 @@ const SOSDetailPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [sos, setSos]           = useState(null);
-  const [loading, setLoading]   = useState(true);
+  const [sos, setSos] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [fetchErr, setFetchErr] = useState("");
 
   const [actionLoading, setActionLoading] = useState(false); // accept/reject in-flight
-  const [actionErr, setActionErr]         = useState("");
-  const [accepted, setAccepted]           = useState(false);
+  const [actionErr, setActionErr] = useState("");
+  const [accepted, setAccepted] = useState(false);
 
   /* ── Fetch SOS detail on mount ── */
   useEffect(() => {
@@ -114,7 +116,9 @@ const SOSDetailPage = () => {
         const res = await api.get(`/sos/${id}`);
         setSos(res.data.data);
       } catch (err) {
-        setFetchErr(err.response?.data?.message || "Failed to load SOS request.");
+        setFetchErr(
+          err.response?.data?.message || "Failed to load SOS request.",
+        );
       } finally {
         setLoading(false);
       }
@@ -151,10 +155,10 @@ const SOSDetailPage = () => {
   };
 
   /* ──────────── Derived helpers ──────────── */
-  const p  = sos ? (PRIORITY[sos.priority]   || PRIORITY.medium)  : null;
-  const sc = sos ? (STATUS_CONFIG[sos.status] || STATUS_CONFIG.pending) : null;
+  const p = sos ? PRIORITY[sos.priority] || PRIORITY.medium : null;
+  const sc = sos ? STATUS_CONFIG[sos.status] || STATUS_CONFIG.pending : null;
   const [lng, lat] = sos?.location?.coordinates || [0, 0];
-  const isPending  = sos?.status === "pending";
+  const isPending = sos?.status === "pending";
 
   /* ──────────────────── RENDER ──────────────────── */
   return (
@@ -168,90 +172,11 @@ const SOSDetailPage = () => {
       }}
     >
       {/* ══════ TOP BAR ══════ */}
-      <div
-        style={{
-          background: "#111318",
-          borderBottom: "1px solid #2a2f3a",
-          padding: "14px 28px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexShrink: 0,
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div
-            style={{
-              width: 34,
-              height: 34,
-              background: "#e63946",
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "1rem",
-            }}
-          >
-            🆘
-          </div>
-          <div>
-            <div
-              style={{
-                fontFamily: "Oswald, sans-serif",
-                fontSize: "1.05rem",
-                fontWeight: 600,
-                letterSpacing: "0.04em",
-                color: "#eef0f4",
-              }}
-            >
-              SOS REQUEST DETAIL
-            </div>
-            <div
-              style={{
-                fontSize: "0.7rem",
-                color: "#4a5260",
-                fontFamily: "IBM Plex Mono, monospace",
-              }}
-            >
-              {sos ? `#${sos._id.slice(-8).toUpperCase()}` : "LOADING…"}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {user && (
-            <span
-              style={{
-                fontSize: "0.75rem",
-                fontFamily: "IBM Plex Mono, monospace",
-                color: "#4a5260",
-              }}
-            >
-              {user.name}
-            </span>
-          )}
-          <button
-            onClick={() => navigate("/volunteer/map")}
-            style={{
-              background: "#181c23",
-              border: "1px solid #2a2f3a",
-              borderRadius: 6,
-              padding: "7px 16px",
-              color: "#8892a4",
-              fontSize: "0.78rem",
-              fontFamily: "Oswald, sans-serif",
-              letterSpacing: "0.04em",
-              cursor: "pointer",
-            }}
-          >
-            ← BACK
-          </button>
-        </div>
-      </div>
-
+      <NavTopBar
+        user={user}
+        onBack={() => navigate("/volunteer")}
+        subtitle="VOLUNTEER PORTAL — RESCUE TASK VIEW"
+      />
       {/* ══════ LOADING STATE ══════ */}
       {loading && (
         <div
@@ -367,6 +292,11 @@ const SOSDetailPage = () => {
             boxSizing: "border-box",
           }}
         >
+          <HeaderTag
+            subtitle={`⬤ VOLUNTEER — SOS REQUEST DETAIL ${
+              sos ? `#${sos._id.slice(-8).toUpperCase()}` : "LOADING…"
+            }`}
+          />
           {/* ── Priority + Status badges ── */}
           <div
             style={{
@@ -417,8 +347,12 @@ const SOSDetailPage = () => {
             }}
           >
             <SectionLabel>Victim Information</SectionLabel>
-            {sos.victim?.name  && <InfoRow label="Name"  value={sos.victim.name} />}
-            {sos.victim?.phone && <InfoRow label="Phone" value={sos.victim.phone} mono />}
+            {sos.victim?.name && (
+              <InfoRow label="Name" value={sos.victim.name} />
+            )}
+            {sos.victim?.phone && (
+              <InfoRow label="Phone" value={sos.victim.phone} mono />
+            )}
           </div>
 
           {/* ── Needs card ── */}
@@ -550,8 +484,16 @@ const SOSDetailPage = () => {
               }}
             >
               <SectionLabel>Assigned Volunteer</SectionLabel>
-              {sos.assignedVolunteer.name  && <InfoRow label="Name"  value={sos.assignedVolunteer.name} />}
-              {sos.assignedVolunteer.phone && <InfoRow label="Phone" value={sos.assignedVolunteer.phone} mono />}
+              {sos.assignedVolunteer.name && (
+                <InfoRow label="Name" value={sos.assignedVolunteer.name} />
+              )}
+              {sos.assignedVolunteer.phone && (
+                <InfoRow
+                  label="Phone"
+                  value={sos.assignedVolunteer.phone}
+                  mono
+                />
+              )}
             </div>
           )}
 
@@ -566,7 +508,9 @@ const SOSDetailPage = () => {
                 marginBottom: 16,
               }}
             >
-              <SectionLabel>Media ({sos.media.length} file{sos.media.length > 1 ? "s" : ""})</SectionLabel>
+              <SectionLabel>
+                Media ({sos.media.length} file{sos.media.length > 1 ? "s" : ""})
+              </SectionLabel>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                 {sos.media.map((src, i) => (
                   <a
@@ -586,7 +530,9 @@ const SOSDetailPage = () => {
                         borderRadius: 6,
                         border: "1px solid #2a2f3a",
                       }}
-                      onError={(e) => { e.target.style.display = "none"; }}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
                     />
                   </a>
                 ))}
@@ -670,22 +616,30 @@ const SOSDetailPage = () => {
           <button
             onClick={handleAccept}
             disabled={actionLoading || accepted || !isPending}
-            title={!isPending ? `Cannot accept — status is "${sos?.status}"` : "Accept this SOS request"}
+            title={
+              !isPending
+                ? `Cannot accept — status is "${sos?.status}"`
+                : "Accept this SOS request"
+            }
             style={{
               flex: 1,
               maxWidth: 280,
               padding: "14px 24px",
-              background: actionLoading || accepted || !isPending
-                ? "#1a2a1a"
-                : "linear-gradient(135deg, #27ae60, #2ecc71)",
+              background:
+                actionLoading || accepted || !isPending
+                  ? "#1a2a1a"
+                  : "linear-gradient(135deg, #27ae60, #2ecc71)",
               border: `1px solid ${!isPending ? "#2a2f3a" : "#2ecc71"}`,
               borderRadius: 8,
-              color: actionLoading || accepted || !isPending ? "#4a5260" : "#fff",
+              color:
+                actionLoading || accepted || !isPending ? "#4a5260" : "#fff",
               fontFamily: "Oswald, sans-serif",
               fontSize: "1rem",
               letterSpacing: "0.06em",
               cursor:
-                actionLoading || accepted || !isPending ? "not-allowed" : "pointer",
+                actionLoading || accepted || !isPending
+                  ? "not-allowed"
+                  : "pointer",
               transition: "all 0.15s ease",
               display: "flex",
               alignItems: "center",
@@ -693,7 +647,11 @@ const SOSDetailPage = () => {
               gap: 8,
             }}
           >
-            {actionLoading ? "⟳ PROCESSING…" : accepted ? "✓ ACCEPTED" : "✓ ACCEPT MISSION"}
+            {actionLoading
+              ? "⟳ PROCESSING…"
+              : accepted
+                ? "✓ ACCEPTED"
+                : "✓ ACCEPT MISSION"}
           </button>
         </div>
       )}

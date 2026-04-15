@@ -12,11 +12,12 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import useGPS from "../../hooks/useGPS.js";
 
-import TopBar from "../../components/Topbar.jsx";
 import ControlBar from "../../components/ControlBar.jsx";
 import MapOverlays from "../../components/Mapoverlays.jsx";
 import MapLegend from "../../components/Maplegend.jsx";
 import SosTooltip from "../../components/Sostooltip.jsx";
+import NavTopBar from "../../components/NavTopBar.jsx";
+
 import "../../css/NearbyMap.css";
 
 /* ─── RecenterMap ────────────────────────────────────────────────── */
@@ -79,7 +80,8 @@ const NearbyReliefCamp = () => {
 
   return (
     <div className="nm-page">
-      <TopBar
+      {/* Top bar */}
+      <NavTopBar
         user={user}
         onBack={() => navigate("/victim")}
         subtitle="VICTIM PORTAL — RELIEF CAMP VIEW"

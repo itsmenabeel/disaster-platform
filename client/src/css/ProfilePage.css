@@ -1,0 +1,305 @@
+.profile-page {
+    min-height: 100vh;
+    background: var(--bg-base);
+}
+
+.profile-topbar__sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: "IBM Plex Mono", monospace;
+}
+
+.profile-content {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+    animation: fadeUp 0.4s ease both;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-status-msg {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.profile-status-msg--error {
+    color: #e63946;
+}
+
+.profile-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+}
+
+.profile-card__header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.profile-card__avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Oswald", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid var(--border);
+}
+
+.profile-card__name {
+    font-family: "Oswald", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.profile-card__role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: "Oswald", sans-serif;
+    letter-spacing: 0.04em;
+}
+
+.profile-card__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.profile-card__divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+}
+
+.profile-card__field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.profile-field__label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: "IBM Plex Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+}
+
+.profile-field__value {
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.profile-field__value--muted {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+}
+
+.profile-avail-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: "Oswald", sans-serif;
+    letter-spacing: 0.04em;
+}
+
+.profile-avail-badge--available {
+    background: rgba(46, 204, 113, 0.12);
+    color: #2ecc71;
+}
+
+.profile-avail-badge--unavailable {
+    background: rgba(110, 118, 129, 0.15);
+    color: #8b949e;
+}
+
+.profile-volunteer {
+    margin-top: 24px;
+    background: rgba(52, 152, 219, 0.07);
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+}
+
+.profile-volunteer__label {
+    font-family: "Oswald", sans-serif;
+    font-size: 0.72rem;
+    color: rgba(52, 152, 219, 0.8);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+}
+
+.profile-volunteer__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.profile-volunteer__metric-val {
+    font-size: 1.8rem;
+    font-family: "Oswald", sans-serif;
+    font-weight: 700;
+    color: #3498db;
+    line-height: 1;
+}
+
+.profile-volunteer__metric-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: "IBM Plex Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.profile-stars {
+    display: flex;
+    gap: 3px;
+    margin-top: 6px;
+}
+
+.profile-stars__star {
+    font-size: 14px;
+}
+
+.userChip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px 6px 10px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.userDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+}
+.pr-top-bar__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap; /* ❗ prevent line break */
+}
+.pr-top-bar__user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pr-top-bar__user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #3498db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.pr-top-bar__user-name {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.roleBadge {
+    background: rgba(52, 152, 219, 0.15);
+    border: 1px solid rgba(52, 152, 219, 0.35);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 0.7rem;
+    color: #3498db;
+    font-family: "IBM Plex Mono", monospace;
+    letter-spacing: 0.08em;
+}
+.pr-back-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-family: "Oswald", sans-serif;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.pr-back-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+.logoutBtn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-family: "Oswald", sans-serif;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+}
+
+@media (max-width: 480px) {
+    .profile-topbar {
+        padding: 14px 16px;
+    }
+
+    .profile-content {
+        padding: 24px 16px 48px;
+    }
+
+    .profile-card {
+        padding: 20px;
+    }
+
+    .profile-card__field-grid,
+    .profile-volunteer__grid {
+        grid-template-columns: 1fr;
+    }
+}
