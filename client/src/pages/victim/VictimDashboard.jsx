@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import NavTopBar from "../../components/NavTopBar";
 import HeaderTag from "../../components/HeaderTag";
+import "../../css/TrackRescue.css";
 
 const STATUS_CONFIG = {
   pending: { label: "Pending", color: "#f39c12", bg: "rgba(243,156,18,0.1)" },
@@ -265,12 +266,36 @@ const VictimDashboard = () => {
               <div style={styles.statusBadge(req.status)}>
                 {STATUS_CONFIG[req.status]?.label || req.status}
               </div>
-              {req.status !== "closed" && req.status !== "rescued" && (
+              {req.status !== "closed" && req.status !== "rescued" ? (
                 <button
                   style={styles.trackBtn}
                   onClick={() => navigate(`/victim/track/${req._id}`)}
                 >
                   TRACK
+                </button>
+              ) : (
+                <button
+                  className="tr-vol-card__badge tr-vol-card__badge--action"
+                  onClick={() => {
+                    const volunteerId =
+                      typeof req.assignedVolunteer === "object"
+                        ? req.assignedVolunteer?._id
+                        : req.assignedVolunteer;
+
+                    if (!volunteerId) return;
+
+                    navigate(`/profile/${volunteerId}?sosId=${req._id}`);
+                  }}
+                  disabled={!req.assignedVolunteer}
+                  style={{
+                    background: "rgba(46,204,113,0.15)",
+                    border: "1px solid #2ecc71",
+                    color: "#2ecc71",
+                    opacity: req.assignedVolunteer ? 1 : 0.5,
+                    cursor: req.assignedVolunteer ? "pointer" : "not-allowed",
+                  }}
+                >
+                  ⭐ Rate Volunteer
                 </button>
               )}
             </div>

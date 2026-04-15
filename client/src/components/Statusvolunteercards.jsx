@@ -1,8 +1,8 @@
-// components/TrackRescue/StatusVolunteerCards.jsx
-import React from "react";
+import { useNavigate } from "react-router-dom";
 import "../css/TrackRescue.css";
 
 const StatusVolunteerCards = ({ sos, statusCfg }) => {
+  const navigate = useNavigate();
   const statusSubText =
     {
       pending:
@@ -50,7 +50,12 @@ const StatusVolunteerCards = ({ sos, statusCfg }) => {
               >
                 🙋
               </div>
-              <div>
+              <div
+                onClick={() =>
+                  navigate(`/profile/${sos.assignedVolunteer._id}`)
+                }
+                style={{ cursor: "pointer" }}
+              >
                 <div className="tr-vol-card__name">
                   {sos.assignedVolunteer.name}
                 </div>

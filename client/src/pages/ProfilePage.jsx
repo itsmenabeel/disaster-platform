@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import "../css/ProfilePage.css";
 import NavTopBar from "../components/NavTopBar";
+import RatingSection from "../components/RatingSection";
 
 const ROLE_CONFIG = {
   victim: { label: "VICTIM", color: "#e63946", bg: "rgba(230,57,70,0.15)" },
@@ -51,15 +52,26 @@ const ProfilePage = () => {
   const { userId } = useParams();
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const sosId = new URLSearchParams(location.search).get("sosId");
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sosStatus, setSosStatus] = useState(null);
 
   const isOwn = !userId || userId === currentUser?._id;
 
   useEffect(() => {
-    const endpoint = isOwn ? "/auth/me" : `/users/${userId}`;
+    if (!sosId) return;
+    api
+      .get(`/sos/${sosId}`)
+      .then((res) => setSosStatus(res.data.data?.status ?? null))
+      .catch(() => setSosStatus(null));
+  }, [sosId]);
+
+  useEffect(() => {
+    const endpoint = isOwn ? "/auth/me" : `auth/users/${userId}`;
 
     api
       .get(endpoint)
@@ -72,14 +84,12 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
-      {/* Top bar */}
       <NavTopBar
         user={currentUser}
         onBack={() => navigate(`/${currentUser.role.toLowerCase()}`)}
         subtitle={isOwn ? "MY PROFILE VIEW" : "USER PROFILE VIEW"}
       />
 
-      {/* Main Content */}
       <div className="profile-content">
         {loading && <p className="profile-status-msg">Loading profile...</p>}
         {error && (
@@ -89,104 +99,126 @@ const ProfilePage = () => {
         )}
 
         {profile && (
-          <div className="profile-card">
-            {/* Header */}
-            <div className="profile-card__header">
-              <div
-                className="profile-card__avatar"
-                style={{ background: roleCfg.bg, color: roleCfg.color }}
-              >
-                {getInitials(profile.name)}
-              </div>
-              <div>
-                <div className="profile-card__name">{profile.name}</div>
-                <span
-                  className="profile-card__role-badge"
+          <>
+            {/* ── Profile card (unchanged) ── */}
+            <div className="profile-card">
+              <div className="profile-card__header">
+                <div
+                  className="profile-card__avatar"
                   style={{ background: roleCfg.bg, color: roleCfg.color }}
                 >
-                  <div
-                    className="profile-card__dot"
-                    style={{ background: roleCfg.color }}
-                  />
-                  {roleCfg.label}
-                </span>
-              </div>
-            </div>
-
-            <hr className="profile-card__divider" />
-
-            {/* Fields */}
-            <div className="profile-card__field-grid">
-              <div>
-                <div className="profile-field__label">FULL NAME</div>
-                <div className="profile-field__value">{profile.name}</div>
-              </div>
-              <div>
-                <div className="profile-field__label">EMAIL</div>
-                <div className="profile-field__value--muted">
-                  {profile.email}
+                  {getInitials(profile.name)}
+                </div>
+                <div>
+                  <div className="profile-card__name">{profile.name}</div>
+                  <span
+                    className="profile-card__role-badge"
+                    style={{ background: roleCfg.bg, color: roleCfg.color }}
+                  >
+                    <div
+                      className="profile-card__dot"
+                      style={{ background: roleCfg.color }}
+                    />
+                    {roleCfg.label}
+                  </span>
                 </div>
               </div>
-              <div>
-                <div className="profile-field__label">PHONE NUMBER</div>
-                <div className="profile-field__value">
-                  {profile.phone || "—"}
-                </div>
-              </div>
-              <div>
-                <div className="profile-field__label">ROLE</div>
-                <div className="profile-field__value">{roleCfg.label}</div>
-              </div>
 
-              {profile.role !== "victim" &&
-                profile.isAvailable !== undefined && (
-                  <div>
-                    <div className="profile-field__label">AVAILABILITY</div>
-                    <span
-                      className={`profile-avail-badge ${profile.isAvailable ? "profile-avail-badge--available" : "profile-avail-badge--unavailable"}`}
-                    >
-                      <div
-                        className="profile-card__dot"
-                        style={{
-                          background: profile.isAvailable
-                            ? "#2ecc71"
-                            : "#8b949e",
-                        }}
-                      />
-                      {profile.isAvailable ? "AVAILABLE" : "UNAVAILABLE"}
-                    </span>
+              <hr className="profile-card__divider" />
+
+              <div className="profile-card__field-grid">
+                <div>
+                  <div className="profile-field__label">FULL NAME</div>
+                  <div className="profile-field__value">{profile.name}</div>
+                </div>
+                <div>
+                  <div className="profile-field__label">EMAIL</div>
+                  <div className="profile-field__value--muted">
+                    {profile.email}
                   </div>
-                )}
+                </div>
+                <div>
+                  <div className="profile-field__label">PHONE NUMBER</div>
+                  <div className="profile-field__value">
+                    {profile.phone || "—"}
+                  </div>
+                </div>
+                <div>
+                  <div className="profile-field__label">ROLE</div>
+                  <div className="profile-field__value">{roleCfg.label}</div>
+                </div>
+
+                {profile.role !== "victim" &&
+                  profile.isAvailable !== undefined && (
+                    <div>
+                      <div className="profile-field__label">AVAILABILITY</div>
+                      <span
+                        className={`profile-avail-badge ${
+                          profile.isAvailable
+                            ? "profile-avail-badge--available"
+                            : "profile-avail-badge--unavailable"
+                        }`}
+                      >
+                        <div
+                          className="profile-card__dot"
+                          style={{
+                            background: profile.isAvailable
+                              ? "#2ecc71"
+                              : "#8b949e",
+                          }}
+                        />
+                        {profile.isAvailable ? "AVAILABLE" : "UNAVAILABLE"}
+                      </span>
+                    </div>
+                  )}
+              </div>
+
+              {/* Volunteer performance — only on volunteer profiles */}
+              {profile.role === "volunteer" && (
+                <div className="profile-volunteer">
+                  <div className="profile-volunteer__label">
+                    VOLUNTEER PERFORMANCE
+                  </div>
+                  <div className="profile-volunteer__grid">
+                    <div>
+                      <div className="profile-volunteer__metric-val">
+                        {(profile.reliabilityScore ?? 0).toFixed(1)}
+                      </div>
+                      <StarRating score={profile.reliabilityScore ?? 0} />
+                      <div className="profile-volunteer__metric-label">
+                        RELIABILITY SCORE
+                      </div>
+                    </div>
+                    <div>
+                      <div className="profile-volunteer__metric-val">
+                        {profile.totalRatings ?? 0}
+                      </div>
+                      <div className="profile-volunteer__metric-label">
+                        TOTAL RATINGS
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Volunteer-only section */}
+            {/*
+              ── Rating section ──
+              Only renders when viewing a volunteer profile.
+              RatingSection itself handles whether to show the form
+              (victim only) or just the summary (everyone else).
+            */}
             {profile.role === "volunteer" && (
-              <div className="profile-volunteer">
-                <div className="profile-volunteer__label">
-                  VOLUNTEER PERFORMANCE
-                </div>
-                <div className="profile-volunteer__grid">
-                  <div>
-                    <div className="profile-volunteer__metric-val">
-                      {(profile.reliabilityScore ?? 0).toFixed(1)}
-                    </div>
-                    <StarRating score={profile.reliabilityScore ?? 0} />
-                    <div className="profile-volunteer__metric-label">
-                      RELIABILITY SCORE
-                    </div>
-                  </div>
-                  <div>
-                    <div className="profile-volunteer__metric-val">
-                      {profile.totalRatings ?? 0}
-                    </div>
-                    <div className="profile-volunteer__metric-label">
-                      TOTAL RATINGS
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <RatingSection
+                volunteerId={profile._id}
+                sosId={sosId}
+                sosStatus={sosStatus}
+                currentRole={currentUser?.role}
+                reliabilityScore={profile.reliabilityScore ?? 0}
+                totalRatings={profile.totalRatings ?? 0}
+              />
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

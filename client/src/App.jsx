@@ -147,6 +147,14 @@ const App = () => (
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/rate-volunteer/:id"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
         {/* NGO routes */}
         <Route
           path="/ngo"
