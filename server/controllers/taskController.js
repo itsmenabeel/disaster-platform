@@ -1,5 +1,6 @@
 const Task = require("../models/Task");
 const SOSRequest = require("../models/SOSRequest");
+const User = require("../models/User");
 
 // @desc    Get tasks for logged-in volunteer
 // @route   GET /api/tasks
@@ -97,69 +98,152 @@ const updateTaskStatus = async (req, res) => {
   }
 };
 
-// @desc    Rate a volunteer after task completion
-// @route   PUT /api/tasks/:id/rate
-// @access  Private (victim)
-const rateVolunteer = async (req, res) => {
+// task.controller.js
+const getTaskRatingStatus = async (req, res) => {
   try {
-    const { score, sosID } = req.body;
-    console.log(score);
+    const { id: sosId } = req.params;
+    const { volunteerId } = req.query;
 
-    // Validate score
-    if (!score || typeof score !== "number" || score < 1 || score > 5) {
+    if (!volunteerId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "volunteerId is required." });
+    }
+
+    const task = await Task.findOne({
+      sosRequest: sosId,
+      volunteer: volunteerId,
+    });
+
+    if (!task) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      isRated: task.isRated,
+      status: task.status,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Server error." });
+  }
+};
+// /**
+//  * POST /api/tasks/:id/rate
+//  * Params: id = sosId
+//  * Body: { volunteerId, score }
+
+const rateTask = async (req, res) => {
+  try {
+    const { id: sosId } = req.params;
+    const { volunteerId, score } = req.body;
+
+    // ── Validate inputs ──────────────────────────────────────────────────────
+    if (!volunteerId || score === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "volunteerId and score are required.",
+      });
+    }
+
+    if (typeof score !== "number" || score < 1 || score > 5) {
       return res.status(400).json({
         success: false,
         message: "Score must be a number between 1 and 5.",
       });
     }
 
-    const volunteer = await User.findById(sosID);
+    // ── Find the task ────────────────────────────────────────────────────────
+    const task = await Task.findOne({
+      sosRequest: sosId,
+      volunteer: volunteerId,
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "No task found for the given sosId and volunteerId.",
+      });
+    }
+
+    // ── task: must be completed ─────────────────────────────────────────────
+    if (task.status !== "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Task cannot be rated because it is not completed yet.",
+      });
+    }
+
+    // ── task & Volunteer: already rated ─────────────────────────────────────────────────
+    if (task.isRated) {
+      return res.status(400).json({
+        success: false,
+        message: "This task has already been rated.",
+      });
+    }
+
+    // ── Find the volunteer ───────────────────────────────────────────────────
+    const volunteer = await User.findById(volunteerId);
 
     if (!volunteer) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Volunteer not found." });
+      return res.status(404).json({
+        success: false,
+        message: "Volunteer not found.",
+      });
     }
 
     if (volunteer.role !== "volunteer") {
-      return res
-        .status(400)
-        .json({ success: false, message: "You can only rate volunteers." });
+      return res.status(400).json({
+        success: false,
+        message: "You can only rate volunteers.",
+      });
     }
 
-    // Prevent self-rating (shouldn't happen given role guard, but just in case)
-    if (volunteer._id.toString() === req.user._id.toString()) {
-      return res
-        .status(400)
-        .json({ success: false, message: "You cannot rate yourself." });
-    }
-
-    // Recalculate running average:
+    // ── Recalculate running average ──────────────────────────────────────────
     // newAvg = (oldAvg * totalRatings + newScore) / (totalRatings + 1)
     const oldTotal = volunteer.totalRatings || 0;
-    const oldScore = volunteer.reliabilityScore || 0;
+    const oldAvg = volunteer.reliabilityScore || 0;
     const newTotal = oldTotal + 1;
-    const newScore = parseFloat(
-      ((oldScore * oldTotal + score) / newTotal).toFixed(2),
+    const newAvg = parseFloat(
+      ((oldAvg * oldTotal + score) / newTotal).toFixed(2),
     );
 
-    volunteer.reliabilityScore = newScore;
+    volunteer.reliabilityScore = newAvg;
     volunteer.totalRatings = newTotal;
 
-    await volunteer.save();
+    // ── Save both atomically ─────────────────────────────────────────────────
+    task.isRated = true;
+    await Promise.all([task.save(), volunteer.save()]);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Rating submitted successfully.",
+      message: "Task rated successfully.",
       data: {
-        reliabilityScore: volunteer.reliabilityScore,
-        totalRatings: volunteer.totalRatings,
+        taskId: task._id,
+        isRated: task.isRated,
+        volunteer: {
+          id: volunteer._id,
+          reliabilityScore: volunteer.reliabilityScore,
+          totalRatings: volunteer.totalRatings,
+        },
       },
     });
   } catch (error) {
-    console.error("rateVolunteer error:", error);
-    res.status(500).json({ success: false, message: "Server error." });
+    console.error("rateTask error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error.message,
+    });
   }
 };
 
-module.exports = { getMyTasks, respondToTask, updateTaskStatus, rateVolunteer };
+module.exports = {
+  getMyTasks,
+  respondToTask,
+  updateTaskStatus,
+  rateTask,
+  getTaskRatingStatus,
+};

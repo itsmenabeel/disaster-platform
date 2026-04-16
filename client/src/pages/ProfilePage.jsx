@@ -54,6 +54,8 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const sosId = new URLSearchParams(location.search).get("sosId");
+  console.log(userId);
+  console.log(sosId);
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);

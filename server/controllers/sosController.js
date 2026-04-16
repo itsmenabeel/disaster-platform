@@ -243,6 +243,68 @@ const rejectSOS = async (req, res) => {
   }
 };
 
+const rateVolunteer = async (req, res) => {
+  try {
+    const { score } = req.body;
+    const { id } = req.params;
+    // Validate score
+    if (!score || typeof score !== "number" || score < 1 || score > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Score must be a number between 1 and 5.",
+      });
+    }
+
+    const volunteer = await User.findById(id);
+
+    if (!volunteer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Volunteer not found." });
+    }
+
+    if (volunteer.role !== "volunteer") {
+      return res
+        .status(400)
+        .json({ success: false, message: "You can only rate volunteers." });
+    }
+
+    // Prevent self-rating (shouldn't happen given role guard, but just in case)
+    if (volunteer._id.toString() === req.user._id.toString()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "You cannot rate yourself." });
+    }
+
+    // Recalculate running average:
+    // newAvg = (oldAvg * totalRatings + newScore) / (totalRatings + 1)
+    const oldTotal = volunteer.totalRatings || 0;
+    const oldScore = volunteer.reliabilityScore || 0;
+    const newTotal = oldTotal + 1;
+    const newScore = parseFloat(
+      ((oldScore * oldTotal + score) / newTotal).toFixed(2),
+    );
+
+    volunteer.reliabilityScore = newScore;
+    volunteer.totalRatings = newTotal;
+
+    await volunteer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Rating submitted successfully.",
+      data: {
+        reliabilityScore: volunteer.reliabilityScore,
+        totalRatings: volunteer.totalRatings,
+      },
+    });
+  } catch (error) {
+    console.log("inside eror");
+    console.error("rateVolunteer error:", error);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+};
+
 module.exports = {
   createSOS,
   getSOSRequests,
@@ -252,4 +314,5 @@ module.exports = {
   getNearbyRequests,
   acceptSOS,
   rejectSOS,
+  rateVolunteer,
 };

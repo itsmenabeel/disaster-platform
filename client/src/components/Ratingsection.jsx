@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import "../css/Ratingsection.css";
 
@@ -64,14 +64,40 @@ const RatingSection = ({
   const [score, setScore] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState(null);
-  const [hasRated, setHasRated] = useState(false);
 
   const [liveScore, setLiveScore] = useState(reliabilityScore);
   const [liveTotal, setLiveTotal] = useState(totalRatings);
 
-  const isVictim = currentRole === "victim";
-  const canRate = isVictim && sosId && sosStatus === "rescued";
+  const [isRated, setIsRated] = useState(false);
+  const [checking, setChecking] = useState(false);
 
+  // ── role checks ─────────────────────────────────────────────────────────────
+  const isVictim = currentRole === "victim";
+  const canRate = isVictim && sosId && sosStatus === "rescued" && !isRated;
+
+  // ── Check isRated on mount ───────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isVictim || !sosId || sosStatus !== "rescued") return;
+
+    const checkRatingStatus = async () => {
+      setChecking(true);
+      try {
+        const res = await api.get(
+          `/tasks/${sosId}/rating-status?volunteerId=${volunteerId}`,
+        );
+        setIsRated(res.data.isRated);
+      } catch (err) {
+        // If task not found or any error, prevent rating to be safe
+        setIsRated(true);
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    checkRatingStatus();
+  }, [sosId, volunteerId, sosStatus, currentRole]);
+
+  // ── Submit rating ────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (score === 0 || submitting || !sosId) return;
 
@@ -79,17 +105,17 @@ const RatingSection = ({
     setSubmitMsg(null);
 
     try {
-      const res = await api.put(`/volunteer/${volunteerId}/rate`, {
+      const res = await api.post(`/tasks/${sosId}/rate`, {
+        volunteerId,
         score,
-        sosId, // ✅ SEND SOS ID
       });
 
       const { reliabilityScore: newScore, totalRatings: newTotal } =
-        res.data.data;
+        res.data.data.volunteer;
 
       setLiveScore(newScore);
       setLiveTotal(newTotal);
-      setHasRated(true);
+      setIsRated(true);
 
       setSubmitMsg({
         type: "success",
@@ -125,20 +151,31 @@ const RatingSection = ({
         <p className="rating-section__no-ratings">No ratings yet.</p>
       )}
 
-      {/* ── Show message if victim but no SOS ── */}
-      {isVictim && sosId && sosStatus !== "rescued" && sosStatus !== null && (
-        <p className="rating-section__no-ratings">
-          Rating is only available once the rescue is complete.
-        </p>
+      {/* ── Checking spinner ── */}
+      {checking && (
+        <div className="rating-section__checking">
+          <span className="rating-section__spinner" /> Checking rating status…
+        </div>
       )}
-      {isVictim && !sosId && (
+
+      {/* ── Info messages ── */}
+      {!checking &&
+        isVictim &&
+        sosId &&
+        sosStatus !== "rescued" &&
+        sosStatus !== null && (
+          <p className="rating-section__no-ratings">
+            Rating is only available once the rescue is complete.
+          </p>
+        )}
+      {!checking && isVictim && !sosId && (
         <p className="rating-section__no-ratings">
           You can only rate a volunteer from a SOS request.
         </p>
       )}
 
-      {/* ── Rating Form ── */}
-      {canRate && !hasRated && (
+      {/* ── Rating form ── */}
+      {!checking && canRate && (
         <div className="rating-form">
           <div className="rating-form__title">RATE THIS VOLUNTEER</div>
 
@@ -163,9 +200,9 @@ const RatingSection = ({
       )}
 
       {/* ── Already rated ── */}
-      {canRate && hasRated && (
+      {!checking && isVictim && sosId && isRated && (
         <div className="rating-form__already-rated">
-          ✓ You have rated this volunteer.
+          ✓ You have already rated this volunteer.
         </div>
       )}
     </div>

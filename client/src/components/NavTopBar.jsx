@@ -8,7 +8,6 @@ const NavTopBar = ({ onBack, user, subtitle }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const isDashboardPage = location.pathname === `/${user?.role?.toLowerCase()}`;
-  console.log(isDashboardPage);
   return (
     <div className="tr-top-bar">
       <div className="tr-top-bar__left">
