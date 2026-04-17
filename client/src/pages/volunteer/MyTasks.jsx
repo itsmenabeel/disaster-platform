@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import NavTopBar from "../../components/NavTopBar";
+import MessageThread from "../../components/MessageThread.jsx";
 
 /* ─── Status config ─── */
 const STATUS_META = {
@@ -27,6 +28,11 @@ const STATUS_META = {
     bg: "rgba(46,204,113,0.12)",
   },
   rejected: { label: "Rejected", color: "#e63946", bg: "rgba(230,57,70,0.12)" },
+  cancelled: {
+    label: "Resolved by Issuer",
+    color: "#e67e22",
+    bg: "rgba(230,126,34,0.12)",
+  },
 };
 
 /* ─── Which next statuses are allowed from each current status ─── */
@@ -153,6 +159,32 @@ const styles = {
     lineHeight: 1.5,
     fontStyle: "italic",
   },
+  cancelledStrip: {
+    padding: "12px 20px",
+    background: "rgba(230,126,34,0.07)",
+    borderTop: "1px solid rgba(230,126,34,0.25)",
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "10px",
+    fontSize: "0.82rem",
+    color: "#e67e22",
+    lineHeight: 1.5,
+  },
+  cancelledIcon: {
+    flexShrink: 0,
+    marginTop: "1px",
+  },
+  cancelledReason: {
+    flex: 1,
+  },
+  cancelledLabel: {
+    fontSize: "0.68rem",
+    fontFamily: "IBM Plex Mono, monospace",
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    marginBottom: "3px",
+    opacity: 0.8,
+  },
 
   /* Action footer */
   cardFooter: {
@@ -248,7 +280,7 @@ const styles = {
 /* ─── Progress timeline helper ─── */
 const STAGES = ["pending", "accepted", "on_the_way", "completed"];
 const Timeline = ({ status }) => {
-  if (status === "rejected") return null;
+  if (status === "rejected" || status === "cancelled") return null;
   const idx = STAGES.indexOf(status);
   return (
     <div style={styles.timeline}>
@@ -274,6 +306,7 @@ const FILTERS = [
   "on_the_way",
   "completed",
   "rejected",
+  "cancelled",
 ];
 const FILTER_LABELS = {
   all: "All",
@@ -282,6 +315,7 @@ const FILTER_LABELS = {
   on_the_way: "On the Way",
   completed: "Completed",
   rejected: "Rejected",
+  cancelled: "Resolved by Issuer",
 };
 
 const MyTasks = () => {
@@ -533,6 +567,32 @@ const MyTasks = () => {
                 {/* Description strip */}
                 {sos?.description && (
                   <div style={styles.descStrip}>"{sos.description}"</div>
+                )}
+
+                {/* Rescue chat — visible while the volunteer has an active assignment */}
+                {(task.status === "accepted" || task.status === "on_the_way") &&
+                  sos?._id && (
+                    <div style={{ padding: "0 20px 20px" }}>
+                      <MessageThread sosId={sos._id} isActive={true} />
+                    </div>
+                  )}
+
+                {/* Cancelled strip — shown when victim resolved the SOS before completion */}
+                {task.status === "cancelled" && task.notes && (
+                  <div style={styles.cancelledStrip}>
+                    <span style={styles.cancelledIcon}>⚠️</span>
+                    <div style={styles.cancelledReason}>
+                      <div style={styles.cancelledLabel}>
+                        SOS resolved by victim — reason
+                      </div>
+                      {task.notes
+                        .replace(
+                          /^SOS resolved by victim before completion\. Reason: "/,
+                          "",
+                        )
+                        .replace(/"$/, "")}
+                    </div>
+                  </div>
                 )}
 
                 {/* Action footer — only for actionable statuses */}
