@@ -1,6 +1,6 @@
-const Notification = require('../models/Notification');
-const User = require('../models/User');
-const transporter = require('../config/mailer');
+const Notification = require("../models/Notification");
+const User = require("../models/User");
+const transporter = require("../config/mailer");
 
 // @desc    Create a notification (admin broadcast)
 // @route   POST /api/notifications
@@ -19,9 +19,10 @@ const createNotification = async (req, res) => {
 
     // Send emails if emergency broadcast
     if (isEmergencyBroadcast) {
-      const roleFilter =
-        targetRoles.includes('all') ? {} : { role: { $in: targetRoles } };
-      const users = await User.find(roleFilter).select('email name');
+      const roleFilter = targetRoles.includes("all")
+        ? {}
+        : { role: { $in: targetRoles } };
+      const users = await User.find(roleFilter).select("email name");
 
       const emailList = users.map((u) => u.email);
       if (emailList.length > 0) {
@@ -40,13 +41,19 @@ const createNotification = async (req, res) => {
   }
 };
 
-// @desc    Get notifications for logged-in user (based on role)
+// @desc    Get notifications for logged-in user (based on role OR direct targetUsers match)
 // @route   GET /api/notifications
 // @access  Private
 const getNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({
-      $or: [{ targetRoles: 'all' }, { targetRoles: req.user.role }],
+      $or: [
+        // Role-based broadcast notifications
+        { targetRoles: "all" },
+        { targetRoles: req.user.role },
+        // Direct per-user notifications (e.g. volunteer notified of SOS update/resolve)
+        { targetUsers: req.user._id },
+      ],
     }).sort({ createdAt: -1 });
 
     res.json({ success: true, data: notifications });
@@ -63,7 +70,7 @@ const markAsRead = async (req, res) => {
     await Notification.findByIdAndUpdate(req.params.id, {
       $addToSet: { readBy: req.user._id },
     });
-    res.json({ success: true, message: 'Marked as read' });
+    res.json({ success: true, message: "Marked as read" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

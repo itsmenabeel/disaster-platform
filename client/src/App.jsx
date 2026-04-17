@@ -17,6 +17,7 @@ import VictimDashboard from "./pages/victim/VictimDashboard";
 import CreateSOS from "./pages/victim/CreateSOS";
 import TrackRescue from "./pages/victim/TrackRescue";
 import NearbyReliefCamp from "./pages/victim/NearbyReliefCamp";
+import EditSOS from "./pages/victim/EditSOS";
 
 // Volunteer Pages
 import VolunteerDashboard from "./pages/volunteer/VolunteerDashboard";
@@ -103,6 +104,14 @@ const App = () => (
           element={
             <ProtectedRoute roles={["victim"]}>
               <TrackRescue />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/victim/sos/edit/:id"
+          element={
+            <ProtectedRoute roles={["victim"]}>
+              <EditSOS />
             </ProtectedRoute>
           }
         />

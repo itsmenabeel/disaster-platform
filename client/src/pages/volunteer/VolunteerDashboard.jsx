@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
@@ -84,8 +84,24 @@ const styles = {
     fontWeight: 600,
     letterSpacing: "0.03em",
     marginBottom: "4px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   },
   navDesc: { fontSize: "0.8rem", color: "var(--text-secondary)" },
+  navUnreadBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "1px 7px",
+    borderRadius: "10px",
+    background: "rgba(243,156,18,0.2)",
+    border: "1px solid rgba(243,156,18,0.5)",
+    color: "#f39c12",
+    fontSize: "0.62rem",
+    fontFamily: "IBM Plex Mono, monospace",
+    fontWeight: 700,
+    letterSpacing: "0.06em",
+  },
   sectionTitle: {
     fontFamily: "Oswald, sans-serif",
     fontSize: "1rem",
@@ -113,6 +129,17 @@ const styles = {
     color: "var(--text-muted)",
     fontFamily: "IBM Plex Mono, monospace",
     marginBottom: "4px",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  taskUnreadDot: {
+    width: 7,
+    height: 7,
+    borderRadius: "50%",
+    background: "#f39c12",
+    flexShrink: 0,
+    display: "inline-block",
   },
   taskNeeds: { fontSize: "0.88rem", fontWeight: 500, marginBottom: "2px" },
   taskDate: { fontSize: "0.75rem", color: "var(--text-muted)" },
@@ -127,12 +154,23 @@ const styles = {
   },
 };
 
+/* ─── Unread chat helper ─────────────────────────────────────────── */
+const hasUnreadChat = (sosId) => {
+  if (!sosId) return false;
+  const lastMsg = localStorage.getItem(`chatLastMsg_${sosId}`);
+  const lastRead = localStorage.getItem(`chatRead_${sosId}`);
+  if (!lastMsg) return false;
+  if (!lastRead) return true;
+  return Number(lastMsg) > Number(lastRead);
+};
+
 const STATUS_COLOR = {
   pending: "#f39c12",
   accepted: "#3498db",
   on_the_way: "#9b59b6",
   completed: "#2ecc71",
   rejected: "#e63946",
+  cancelled: "#e67e22",
 };
 
 const STATUS_LABEL = {
@@ -141,6 +179,7 @@ const STATUS_LABEL = {
   on_the_way: "On the Way",
   completed: "Completed",
   rejected: "Rejected",
+  cancelled: "Resolved by Issuer",
 };
 
 const VolunteerDashboard = () => {
@@ -168,6 +207,15 @@ const VolunteerDashboard = () => {
   const recent = [...tasks]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 3);
+
+  // Check if any active task has unread messages in localStorage
+  const hasAnyUnreadChat = tasks
+    .filter((t) => t.status === "accepted" || t.status === "on_the_way")
+    .some((t) => {
+      const sosId =
+        typeof t.sosRequest === "object" ? t.sosRequest?._id : t.sosRequest;
+      return hasUnreadChat(sosId);
+    });
 
   return (
     <div style={styles.page}>
@@ -220,6 +268,7 @@ const VolunteerDashboard = () => {
               color: "#e63946",
               title: "MY TASKS",
               desc: "Accept, reject, and update your rescue assignments",
+              unread: hasAnyUnreadChat,
             },
             {
               to: "/volunteer/map",
@@ -246,6 +295,9 @@ const VolunteerDashboard = () => {
               <div>
                 <div style={{ ...styles.navTitle, color: c.color }}>
                   {c.title}
+                  {c.unread && (
+                    <span style={styles.navUnreadBadge}>💬 NEW</span>
+                  )}
                 </div>
                 <div style={styles.navDesc}>{c.desc}</div>
               </div>
@@ -278,11 +330,29 @@ const VolunteerDashboard = () => {
         ) : (
           recent.map((task) => {
             const sos = task.sosRequest;
+            const sosId = typeof sos === "object" ? sos?._id : sos;
+            const isActiveTask =
+              task.status === "accepted" || task.status === "on_the_way";
+            const taskHasUnread = isActiveTask && hasUnreadChat(sosId);
             return (
-              <div key={task._id} style={styles.recentCard}>
+              <div
+                key={task._id}
+                style={{
+                  ...styles.recentCard,
+                  borderColor: taskHasUnread
+                    ? "rgba(243,156,18,0.45)"
+                    : "var(--border)",
+                }}
+              >
                 <div>
                   <div style={styles.taskId}>
                     #{task._id.slice(-8).toUpperCase()}
+                    {taskHasUnread && (
+                      <span
+                        style={styles.taskUnreadDot}
+                        title="Unread messages"
+                      />
+                    )}
                   </div>
                   <div style={styles.taskNeeds}>
                     {sos?.needs?.join(", ") || "—"}

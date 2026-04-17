@@ -9,6 +9,7 @@ import StatusVolunteerCards from "../../components/StatusVolunteerCards";
 import RequestDetailsCard from "../../components/RequestDetailsCard";
 import MediaCard from "../../components/Mediacard.jsx";
 import NavTopBar from "../../components/NavTopBar.jsx";
+import MessageThread from "../../components/MessageThread.jsx";
 
 import "../../css/TrackRescue.css";
 
@@ -198,6 +199,42 @@ const TrackRescue = () => {
               PRIORITY: {priority.label}
             </span>
           </div>
+
+          {/* Edit / Resolve — only visible for active (non-terminal) requests */}
+          {!isResolved && (
+            <div style={{ marginTop: "16px" }}>
+              <button
+                onClick={() => navigate(`/victim/sos/edit/${sos._id}`)}
+                style={{
+                  background: "var(--bg-elevated)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius)",
+                  padding: "8px 18px",
+                  color: "var(--text-secondary)",
+                  fontSize: "0.82rem",
+                  fontFamily: "Oswald, sans-serif",
+                  letterSpacing: "0.06em",
+                  cursor: "pointer",
+                  transition: "all var(--transition)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "7px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--bg-surface)";
+                  e.currentTarget.style.color = "var(--text-primary)";
+                  e.currentTarget.style.borderColor = "#1a7a5e";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "var(--bg-elevated)";
+                  e.currentTarget.style.color = "var(--text-secondary)";
+                  e.currentTarget.style.borderColor = "var(--border)";
+                }}
+              >
+                ✏️ EDIT / RESOLVE REQUEST
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Timeline */}
@@ -209,6 +246,11 @@ const TrackRescue = () => {
 
         {/* Status + Volunteer */}
         <StatusVolunteerCards sos={sos} statusCfg={cfg} />
+
+        {/* Rescue chat — only shown once a volunteer has been assigned */}
+        {sos.assignedVolunteer && (
+          <MessageThread sosId={sos._id} isActive={!isResolved} />
+        )}
 
         {/* Request details */}
         <RequestDetailsCard sos={sos} />
