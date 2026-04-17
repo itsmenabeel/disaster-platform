@@ -9,6 +9,7 @@ const {
   getNearbyRequests,
   acceptSOS,
   rejectSOS,
+  rateVolunteer,
 } = require("../controllers/sosController");
 const { protect, authorize } = require("../middleware/auth");
 const upload = require("../middleware/upload");
@@ -37,6 +38,7 @@ router.put(
   upload.array("media", 5),
   uploadMedia,
 );
+router.put("/:id/rate", protect, authorize("victim"), rateVolunteer);
 router.put("/:id/priority", protect, authorize("admin"), setPriority);
 
 module.exports = router;

@@ -10,7 +10,8 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
-
+//Profile Page
+import ProfilePage from "./pages/ProfilePage";
 // Victim Pages
 import VictimDashboard from "./pages/victim/VictimDashboard";
 import CreateSOS from "./pages/victim/CreateSOS";
@@ -62,13 +63,11 @@ const App = () => (
       <Routes>
         {/* Public landing page */}
         <Route path="/" element={<LandingPage />} />
-
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-
         {/* Role redirect after login */}
         <Route
           path="/dashboard"
@@ -78,7 +77,10 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-
+        {/* own profile */}
+        <Route path="/profile" element={<ProfilePage />} />
+        {/* anyone's profile */}
+        <Route path="/profile/:userId" element={<ProfilePage />} />{" "}
         {/* Victim routes */}
         <Route
           path="/victim"
@@ -112,7 +114,6 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-
         {/* Volunteer routes */}
         <Route
           path="/volunteer"
@@ -146,7 +147,14 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/rate-volunteer/:id"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
         {/* NGO routes */}
         <Route
           path="/ngo"
@@ -180,7 +188,6 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-
         {/* Admin routes */}
         <Route
           path="/admin"
@@ -214,7 +221,6 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

@@ -4,11 +4,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
-import TopBar from "../../components/Topbar.jsx";
 import TimelineCard from "../../components/TimelineCard";
 import StatusVolunteerCards from "../../components/StatusVolunteerCards";
 import RequestDetailsCard from "../../components/RequestDetailsCard";
 import MediaCard from "../../components/Mediacard.jsx";
+import NavTopBar from "../../components/NavTopBar.jsx";
+
 import "../../css/TrackRescue.css";
 
 /* ─── Static config maps ─────────────────────────────────────────── */
@@ -114,7 +115,7 @@ const TrackRescue = () => {
   if (loading)
     return (
       <div className="tr-page">
-        <TopBar user={user} />
+        <NavTopBar user={user} />
         <div className="tr-centre-wrap">
           <span>Loading rescue status...</span>
         </div>
@@ -125,7 +126,7 @@ const TrackRescue = () => {
   if (error)
     return (
       <div className="tr-page">
-        <TopBar
+        <NavTopBar
           user={user}
           onBack={() => navigate("/victim")}
           subtitle="VICTIM PORTAL — LIVE TRACKING"
@@ -161,14 +162,12 @@ const TrackRescue = () => {
         {!isResolved && <div className="tr-alert-dot" />}
         {bannerText}
       </div>
-
       {/* Top bar */}
-      <TopBar
+      <NavTopBar
         user={user}
         onBack={() => navigate("/victim")}
         subtitle="VICTIM PORTAL — LIVE TRACKING"
       />
-
       {/* Main content */}
       <div className="tr-content">
         {/* Page header */}
@@ -191,7 +190,7 @@ const TrackRescue = () => {
           <div className="tr-page-title">Rescue Status</div>
 
           <div className="tr-page-meta">
-            <span>ID: #{sos._id.slice(-8).toUpperCase()}</span>
+            <span>ID: #{sos?._id?.slice(-8)?.toUpperCase().toUpperCase()}</span>
             <span>
               Submitted: {fmt(sos.createdAt)} ({timeAgo(sos.createdAt)})
             </span>

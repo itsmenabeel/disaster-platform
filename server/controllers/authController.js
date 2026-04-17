@@ -1,10 +1,12 @@
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const transporter = require('../config/mailer');
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const transporter = require("../config/mailer");
 
 const generateToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
+  jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -15,7 +17,9 @@ const register = async (req, res) => {
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ success: false, message: 'Email already registered' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already registered" });
     }
 
     const user = await User.create({ name, email, password, role, phone });
@@ -23,7 +27,12 @@ const register = async (req, res) => {
     res.status(201).json({
       success: true,
       token: generateToken(user._id),
-      user: { _id: user._id, name: user.name, email: user.email, role: user.role },
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -39,13 +48,20 @@ const login = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user || !(await user.matchPassword(password))) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
     }
 
     res.json({
       success: true,
       token: generateToken(user._id),
-      user: { _id: user._id, name: user.name, email: user.email, role: user.role },
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -59,6 +75,24 @@ const getMe = async (req, res) => {
   res.json({ success: true, user: req.user });
 };
 
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select(
+      "name email phone role isAvailable reliabilityScore totalRatings",
+    );
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.json({ success: true, data: user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 // @desc    Update account info
 // @route   PUT /api/auth/me
 // @access  Private
@@ -68,8 +102,8 @@ const updateMe = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { name, phone },
-      { new: true, runValidators: true }
-    ).select('-password');
+      { new: true, runValidators: true },
+    ).select("-password");
 
     res.json({ success: true, user });
   } catch (error) {
@@ -83,7 +117,7 @@ const updateMe = async (req, res) => {
 const deleteMe = async (req, res) => {
   try {
     await User.findByIdAndDelete(req.user._id);
-    res.json({ success: true, message: 'Account deleted successfully' });
+    res.json({ success: true, message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -96,11 +130,16 @@ const forgotPassword = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(404).json({ success: false, message: 'No user with that email' });
+      return res
+        .status(404)
+        .json({ success: false, message: "No user with that email" });
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
     user.resetPasswordExpire = Date.now() + 30 * 60 * 1000; // 30 minutes
     await user.save({ validateBeforeSave: false });
 
@@ -109,12 +148,12 @@ const forgotPassword = async (req, res) => {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
-      subject: 'Password Reset Request',
+      subject: "Password Reset Request",
       html: `<p>You requested a password reset. Click the link below (valid for 30 minutes):</p>
              <a href="${resetUrl}">${resetUrl}</a>`,
     });
 
-    res.json({ success: true, message: 'Password reset email sent' });
+    res.json({ success: true, message: "Password reset email sent" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -125,7 +164,10 @@ const forgotPassword = async (req, res) => {
 // @access  Public
 const resetPassword = async (req, res) => {
   try {
-    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(req.params.token)
+      .digest("hex");
 
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
@@ -133,7 +175,9 @@ const resetPassword = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired token" });
     }
 
     user.password = req.body.password;
@@ -141,10 +185,19 @@ const resetPassword = async (req, res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    res.json({ success: true, message: 'Password reset successful' });
+    res.json({ success: true, message: "Password reset successful" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-module.exports = { register, login, getMe, updateMe, deleteMe, forgotPassword, resetPassword };
+module.exports = {
+  register,
+  login,
+  getMe,
+  updateMe,
+  deleteMe,
+  forgotPassword,
+  resetPassword,
+  getUserById,
+};

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
+import NavTopBar from "../../components/NavTopBar";
 
 const NEEDS = [
   { value: "food", emoji: "🍱", label: "Food" },
@@ -36,41 +38,6 @@ const styles = {
     background: "#fff",
     animation: "pulse-dot 1s ease infinite",
     flexShrink: 0,
-  },
-  topBar: {
-    background: "var(--bg-surface)",
-    borderBottom: "1px solid var(--border)",
-    padding: "16px 32px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  topBarLeft: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-  topBarIcon: {
-    width: "36px",
-    height: "36px",
-    background: "var(--accent)",
-    borderRadius: "8px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "1rem",
-  },
-  topBarTitle: {
-    fontFamily: "Oswald, sans-serif",
-    fontSize: "1.1rem",
-    fontWeight: 600,
-    letterSpacing: "0.04em",
-    color: "var(--text-primary)",
-  },
-  topBarSub: {
-    fontSize: "0.72rem",
-    color: "var(--text-muted)",
-    fontFamily: "IBM Plex Mono, monospace",
   },
   content: {
     maxWidth: "680px",
@@ -328,6 +295,7 @@ const styles = {
 };
 
 const CreateSOS = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [needs, setNeeds] = useState([]);
   const [description, setDescription] = useState("");
@@ -452,16 +420,11 @@ const CreateSOS = () => {
       </div>
 
       {/* Top Bar */}
-      <div style={styles.topBar}>
-        <div style={styles.topBarLeft}>
-          <div style={styles.topBarIcon}>🌊</div>
-          <div>
-            <div style={styles.topBarTitle}>DISASTER RESPONSE PLATFORM</div>
-            <div style={styles.topBarSub}>VICTIM PORTAL</div>
-          </div>
-        </div>
-      </div>
-
+      <NavTopBar
+        user={user}
+        onBack={() => navigate("/victim")}
+        subtitle="VICTIM PORTAL — SOS REQUEST"
+      />
       {/* Main Content */}
       <div style={styles.content}>
         <div style={styles.pageHeader}>

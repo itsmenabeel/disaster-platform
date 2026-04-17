@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
+import NavTopBar from "../../components/NavTopBar";
+import HeaderTag from "../../components/HeaderTag";
+import "../../css/TrackRescue.css";
 
 const STATUS_CONFIG = {
   pending: { label: "Pending", color: "#f39c12", bg: "rgba(243,156,18,0.1)" },
@@ -17,65 +20,7 @@ const STATUS_CONFIG = {
 
 const styles = {
   page: { minHeight: "100vh", background: "var(--bg-base)" },
-  topBar: {
-    background: "var(--bg-surface)",
-    borderBottom: "1px solid var(--border)",
-    padding: "16px 32px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  topLeft: { display: "flex", alignItems: "center", gap: "12px" },
-  logoIcon: {
-    width: 36,
-    height: 36,
-    background: "var(--accent)",
-    borderRadius: 8,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "1rem",
-  },
-  topTitle: {
-    fontFamily: "Oswald, sans-serif",
-    fontSize: "1.1rem",
-    fontWeight: 600,
-    letterSpacing: "0.04em",
-  },
-  topSub: {
-    fontSize: "0.72rem",
-    color: "var(--text-muted)",
-    fontFamily: "IBM Plex Mono, monospace",
-  },
-  userChip: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    background: "var(--bg-elevated)",
-    border: "1px solid var(--border)",
-    borderRadius: "20px",
-    padding: "6px 14px 6px 8px",
-    fontSize: "0.82rem",
-    color: "var(--text-secondary)",
-  },
-  userDot: {
-    width: 8,
-    height: 8,
-    borderRadius: "50%",
-    background: "var(--success)",
-  },
-  logoutBtn: {
-    background: "none",
-    border: "1px solid var(--border)",
-    borderRadius: "var(--radius)",
-    padding: "6px 12px",
-    color: "var(--text-muted)",
-    fontSize: "0.8rem",
-    fontFamily: "Oswald, sans-serif",
-    letterSpacing: "0.04em",
-    cursor: "pointer",
-    transition: "all var(--transition)",
-  },
+
   content: {
     maxWidth: "820px",
     margin: "0 auto",
@@ -217,32 +162,9 @@ const VictimDashboard = () => {
 
   return (
     <div style={styles.page}>
-      <div style={styles.topBar}>
-        <div style={styles.topLeft}>
-          <div style={styles.logoIcon}>🌊</div>
-          <div>
-            <div style={styles.topTitle}>DISASTER RESPONSE</div>
-            <div style={styles.topSub}>VICTIM PORTAL</div>
-          </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={styles.userChip}>
-            <div style={styles.userDot} />
-            {user?.name}
-          </div>
-          <button
-            style={styles.logoutBtn}
-            onClick={() => {
-              logout();
-              navigate("/login");
-            }}
-          >
-            SIGN OUT
-          </button>
-        </div>
-      </div>
-
+      <NavTopBar user={user} subtitle="VICTIM PORTAL" />
       <div style={styles.content}>
+        <HeaderTag subtitle="⬤ VICTIM — DASHBOARD" />
         <div style={styles.greeting}>
           <div style={styles.greetingTitle}>
             Hello, {user?.name?.split(" ")[0]} 👋
@@ -271,6 +193,32 @@ const VictimDashboard = () => {
               <div style={styles.sosTitle}>🆘 SEND SOS REQUEST</div>
               <div style={styles.sosDesc}>
                 Tap here to request emergency rescue and aid
+              </div>
+            </div>
+            <div style={styles.sosArrow}>→</div>
+          </div>
+        </Link>
+
+        {/* Nearby Relief Camps */}
+        <Link to="/victim/relief-camps" style={{ textDecoration: "none" }}>
+          <div
+            style={styles.reliefCard}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow =
+                "0 12px 40px rgba(26,122,94,0.45)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow =
+                "0 8px 32px rgba(26,122,94,0.3)";
+            }}
+          >
+            <div style={styles.sosLeft}>
+              <div style={styles.sosTitle}>⛺ NEARBY RELIEF CAMPS</div>
+              <div style={styles.sosDesc}>
+                Find the nearest relief camps, shelters and aid distribution
+                points
               </div>
             </div>
             <div style={styles.sosArrow}>→</div>
@@ -318,42 +266,41 @@ const VictimDashboard = () => {
               <div style={styles.statusBadge(req.status)}>
                 {STATUS_CONFIG[req.status]?.label || req.status}
               </div>
-              {req.status !== "closed" && req.status !== "rescued" && (
+              {req.status !== "closed" && req.status !== "rescued" ? (
                 <button
                   style={styles.trackBtn}
                   onClick={() => navigate(`/victim/track/${req._id}`)}
                 >
                   TRACK
                 </button>
+              ) : (
+                <button
+                  className="tr-vol-card__badge tr-vol-card__badge--action"
+                  onClick={() => {
+                    const volunteerId =
+                      typeof req.assignedVolunteer === "object"
+                        ? req.assignedVolunteer?._id
+                        : req.assignedVolunteer;
+
+                    if (!volunteerId) return;
+
+                    navigate(`/profile/${volunteerId}?sosId=${req._id}`);
+                  }}
+                  disabled={!req.assignedVolunteer}
+                  style={{
+                    background: "rgba(46,204,113,0.15)",
+                    border: "1px solid #2ecc71",
+                    color: "#2ecc71",
+                    opacity: req.assignedVolunteer ? 1 : 0.5,
+                    cursor: req.assignedVolunteer ? "pointer" : "not-allowed",
+                  }}
+                >
+                  ⭐ Rate Volunteer
+                </button>
               )}
             </div>
           ))
         )}
-        {/* Nearby Relief Camps */}
-        <Link to="/victim/relief-camps" style={{ textDecoration: "none" }}>
-          <div
-            style={styles.reliefCard}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 12px 40px rgba(26,122,94,0.45)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 8px 32px rgba(26,122,94,0.3)";
-            }}
-          >
-            <div style={styles.sosLeft}>
-              <div style={styles.sosTitle}>⛺ NEARBY RELIEF CAMPS</div>
-              <div style={styles.sosDesc}>
-                Find the nearest relief camps, shelters and aid distribution
-                points
-              </div>
-            </div>
-            <div style={styles.sosArrow}>→</div>
-          </div>
-        </Link>
       </div>
     </div>
   );
