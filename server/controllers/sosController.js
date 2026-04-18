@@ -1,6 +1,7 @@
 const SOSRequest = require("../models/SOSRequest");
 const Task = require("../models/Task");
 const User = require("../models/User");
+const Notification = require("../models/Notification");
 
 // @desc    Create SOS request (auto-assigns nearest available volunteer)
 // @route   POST /api/sos
@@ -243,6 +244,9 @@ const rejectSOS = async (req, res) => {
   }
 };
 
+// @desc    Rate a volunteer after rescue is complete
+// @route   PUT /api/sos/:id/rate
+// @access  Private (victim)
 const rateVolunteer = async (req, res) => {
   try {
     const { score } = req.body;
@@ -305,6 +309,197 @@ const rateVolunteer = async (req, res) => {
   }
 };
 
+// @desc    Update an existing SOS request (victim only, cannot edit resolved/rescued)
+// @route   PUT /api/sos/:id
+// @access  Private (victim)
+const updateSOS = async (req, res) => {
+  try {
+    const { needs, description, address, coordinates, removeMediaIndices } =
+      req.body;
+
+    const sosRequest = await SOSRequest.findById(req.params.id);
+
+    if (!sosRequest) {
+      return res
+        .status(404)
+        .json({ success: false, message: "SOS request not found" });
+    }
+
+    // Only the victim who posted this SOS may edit it
+    if (sosRequest.victim.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized — you can only edit your own SOS requests",
+      });
+    }
+
+    // Block edits on terminal statuses
+    if (sosRequest.status === "rescued" || sosRequest.status === "closed") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Cannot edit an SOS request that is already resolved or closed",
+      });
+    }
+
+    // --- Apply field updates ---
+    if (Array.isArray(needs) && needs.length > 0) sosRequest.needs = needs;
+    if (description !== undefined) sosRequest.description = description;
+    if (address !== undefined) sosRequest.address = address;
+    if (Array.isArray(coordinates) && coordinates.length === 2) {
+      sosRequest.location = { type: "Point", coordinates };
+    }
+
+    // Remove specific existing media items by their original array index.
+    // Sort descending so splicing earlier indices doesn't shift later ones.
+    if (Array.isArray(removeMediaIndices) && removeMediaIndices.length > 0) {
+      const sorted = [...removeMediaIndices].sort((a, b) => b - a);
+      sorted.forEach((i) => {
+        if (i >= 0 && i < sosRequest.media.length) {
+          sosRequest.media.splice(i, 1);
+        }
+      });
+    }
+
+    await sosRequest.save();
+
+    // If coordinates changed and the request is still pending, try to
+    // auto-assign the nearest available volunteer at the new location.
+    if (
+      Array.isArray(coordinates) &&
+      coordinates.length === 2 &&
+      sosRequest.status === "pending"
+    ) {
+      const nearestVolunteer = await User.findOne({
+        role: "volunteer",
+        isAvailable: true,
+        location: {
+          $near: {
+            $geometry: { type: "Point", coordinates },
+            $maxDistance: 50000,
+          },
+        },
+      });
+
+      if (nearestVolunteer) {
+        await Task.create({
+          sosRequest: sosRequest._id,
+          volunteer: nearestVolunteer._id,
+        });
+        sosRequest.assignedVolunteer = nearestVolunteer._id;
+        sosRequest.status = "assigned";
+        await sosRequest.save();
+      }
+    }
+
+    // If a volunteer is already assigned, notify them of the changes
+    // so they can review the updated details before heading out.
+    if (sosRequest.assignedVolunteer) {
+      const shortId = sosRequest._id.toString().slice(-6).toUpperCase();
+      await Notification.create({
+        sender: req.user._id,
+        title: "SOS Request Updated by Victim",
+        message: `The victim has updated the details of SOS request #${shortId}. Please review the latest information in your active task before proceeding.`,
+        targetRoles: [], // targeted — do NOT broadcast to the whole role group
+        targetUsers: [sosRequest.assignedVolunteer],
+      });
+    }
+
+    // Return the fully populated updated document
+    const updated = await SOSRequest.findById(sosRequest._id)
+      .populate("victim", "name phone")
+      .populate("assignedVolunteer", "name phone");
+
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Victim self-resolves (closes) their SOS request
+// @route   DELETE /api/sos/:id
+// @access  Private (victim)
+const resolveSOS = async (req, res) => {
+  try {
+    const { resolveReason } = req.body;
+
+    if (!resolveReason || !resolveReason.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "A resolve reason is required",
+      });
+    }
+
+    const sosRequest = await SOSRequest.findById(req.params.id);
+
+    if (!sosRequest) {
+      return res
+        .status(404)
+        .json({ success: false, message: "SOS request not found" });
+    }
+
+    // Only the victim who posted this SOS may resolve it
+    if (sosRequest.victim.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized — you can only resolve your own SOS requests",
+      });
+    }
+
+    // Already in a terminal state — nothing to do
+    if (sosRequest.status === "rescued" || sosRequest.status === "closed") {
+      return res.status(400).json({
+        success: false,
+        message: "This SOS request is already closed",
+      });
+    }
+
+    // Capture the assigned volunteer ID before closing, so we can notify them
+    const assignedVolunteerId = sosRequest.assignedVolunteer
+      ? sosRequest.assignedVolunteer.toString()
+      : null;
+
+    // Close the request
+    sosRequest.status = "closed";
+    sosRequest.resolvedBy = "victim";
+    sosRequest.resolveReason = resolveReason.trim();
+    sosRequest.resolvedAt = new Date();
+    await sosRequest.save();
+
+    // If a volunteer was assigned, update their task record and notify them
+    if (assignedVolunteerId) {
+      const task = await Task.findOne({
+        sosRequest: sosRequest._id,
+        volunteer: assignedVolunteerId,
+        status: { $nin: ["completed", "rejected"] },
+      });
+
+      if (task) {
+        task.status = "cancelled";
+        task.notes = `SOS resolved by victim before completion. Reason: "${resolveReason.trim()}"`;
+        await task.save();
+      }
+
+      const shortId = sosRequest._id.toString().slice(-6).toUpperCase();
+      await Notification.create({
+        sender: req.user._id,
+        title: "SOS Request Resolved by Victim",
+        message: `The victim has resolved SOS request #${shortId} before it could be completed. Reason: "${resolveReason.trim()}". No further action is required on your part.`,
+        targetRoles: [], // targeted — do NOT broadcast to the whole role group
+        targetUsers: [assignedVolunteerId],
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "SOS request resolved successfully",
+      data: sosRequest,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createSOS,
   getSOSRequests,
@@ -315,4 +510,6 @@ module.exports = {
   acceptSOS,
   rejectSOS,
   rateVolunteer,
+  updateSOS,
+  resolveSOS,
 };

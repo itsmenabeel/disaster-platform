@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
@@ -121,12 +121,41 @@ const styles = {
     letterSpacing: "0.04em",
     whiteSpace: "nowrap",
   }),
-  trackBtn: {
-    background: "var(--bg-elevated)",
-    border: "1px solid var(--border)",
+  trackBtn: (hasUnread) => ({
+    background: hasUnread ? "rgba(243,156,18,0.08)" : "var(--bg-elevated)",
+    border: `1px solid ${hasUnread ? "rgba(243,156,18,0.45)" : "var(--border)"}`,
     borderRadius: "var(--radius)",
     padding: "7px 14px",
-    color: "var(--text-secondary)",
+    color: hasUnread ? "#f39c12" : "var(--text-secondary)",
+    fontSize: "0.8rem",
+    fontFamily: "Oswald, sans-serif",
+    letterSpacing: "0.04em",
+    cursor: "pointer",
+    flexShrink: 0,
+    transition: "all var(--transition)",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+  }),
+  unreadDot: {
+    width: 7,
+    height: 7,
+    borderRadius: "50%",
+    background: "#f39c12",
+    flexShrink: 0,
+    display: "inline-block",
+  },
+  btnGroup: {
+    display: "flex",
+    gap: "8px",
+    flexShrink: 0,
+  },
+  editBtn: {
+    background: "var(--bg-elevated)",
+    border: "1px solid rgba(26,122,94,0.5)",
+    borderRadius: "var(--radius)",
+    padding: "7px 14px",
+    color: "#1a7a5e",
     fontSize: "0.8rem",
     fontFamily: "Oswald, sans-serif",
     letterSpacing: "0.04em",
@@ -144,6 +173,16 @@ const styles = {
   },
   emptyIcon: { fontSize: "2.5rem", marginBottom: "10px" },
   emptyText: { fontSize: "0.9rem" },
+};
+
+// Returns true if localStorage records a message newer than the last read
+// timestamp for the given SOS thread.
+const hasUnreadChat = (sosId) => {
+  const lastMsg = localStorage.getItem(`chatLastMsg_${sosId}`);
+  const lastRead = localStorage.getItem(`chatRead_${sosId}`);
+  if (!lastMsg) return false;
+  if (!lastRead) return true;
+  return Number(lastMsg) > Number(lastRead);
 };
 
 const VictimDashboard = () => {
@@ -267,12 +306,25 @@ const VictimDashboard = () => {
                 {STATUS_CONFIG[req.status]?.label || req.status}
               </div>
               {req.status !== "closed" && req.status !== "rescued" ? (
-                <button
-                  style={styles.trackBtn}
-                  onClick={() => navigate(`/victim/track/${req._id}`)}
-                >
-                  TRACK
-                </button>
+                <div style={styles.btnGroup}>
+                  <button
+                    style={styles.trackBtn(
+                      !!req.assignedVolunteer && hasUnreadChat(req._id),
+                    )}
+                    onClick={() => navigate(`/victim/track/${req._id}`)}
+                  >
+                    {req.assignedVolunteer && hasUnreadChat(req._id) && (
+                      <span style={styles.unreadDot} />
+                    )}
+                    TRACK
+                  </button>
+                  <button
+                    style={styles.editBtn}
+                    onClick={() => navigate(`/victim/sos/edit/${req._id}`)}
+                  >
+                    ✏ EDIT
+                  </button>
+                </div>
               ) : (
                 <button
                   className="tr-vol-card__badge tr-vol-card__badge--action"
