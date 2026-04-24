@@ -19,6 +19,11 @@ const incidentSchema = new mongoose.Schema(
     endDate: { type: Date },
     status: { type: String, enum: ['active', 'resolved'], default: 'active' },
     // Linked SOS requests for reference
+    priority: {
+      type: String,
+      enum: ['low', 'medium', 'high', 'critical'],
+      default: 'low',
+    },
     sosRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SOSRequest' }],
     totalRescued: { type: Number, default: 0 },
   },
