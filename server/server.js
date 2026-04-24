@@ -1,8 +1,7 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-const path = require('path');
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
 
 dotenv.config();
 connectDB();
@@ -10,13 +9,15 @@ connectDB();
 const app = express();
 
 /* ✅ FIXED CORS (NO BUGS, NO SLASH ISSUES) */
-app.use(cors({
-  origin: "http://localhost:5173", // 🔥 hardcoded → safest for now
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173", // 🔥 hardcoded → safest for now
+    credentials: true,
+  }),
+);
 
 /* ✅ EXTRA SAFETY (handles preflight requests) */
-app.options('*', cors());
+app.options("*", cors());
 
 /* Middleware */
 app.use(express.json());
