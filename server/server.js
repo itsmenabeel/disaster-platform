@@ -21,30 +21,31 @@ app.options('*', cors());
 /* Middleware */
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+const path = require("path");
+// Serve uploaded files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-/* Serve uploaded files */
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Routes
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/sos/:sosId/messages", require("./routes/messageRoutes"));
+app.use("/api/sos", require("./routes/sosRoutes"));
+app.use("/api/tasks", require("./routes/taskRoutes"));
+app.use("/api/inventory", require("./routes/inventoryRoutes"));
+app.use("/api/camps", require("./routes/campRoutes"));
+app.use("/api/distribution", require("./routes/distributionRoutes"));
+app.use("/api/notifications", require("./routes/notificationRoutes"));
+app.use("/api/incidents", require("./routes/incidentRoutes"));
+app.use("/api/analytics", require("./routes/analyticsRoutes"));
 
-/* Routes */
-app.use('/api/auth',          require('./routes/authRoutes'));
-app.use('/api/sos',           require('./routes/sosRoutes'));
-app.use('/api/tasks',         require('./routes/taskRoutes'));
-app.use('/api/inventory',     require('./routes/inventoryRoutes'));
-app.use('/api/camps',         require('./routes/campRoutes'));
-app.use('/api/distribution',  require('./routes/distributionRoutes'));
-app.use('/api/notifications', require('./routes/notificationRoutes'));
-app.use('/api/incidents',     require('./routes/incidentRoutes'));
-app.use('/api/analytics',     require('./routes/analyticsRoutes'));
-
-/* Health check */
-app.get('/', (req, res) => {
-  res.json({ message: 'Disaster Platform API running' });
-});
+// Health check
+app.get("/", (req, res) =>
+  res.json({ message: "Disaster Platform API running" }),
+);
 
 /* Global error handler */
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ success: false, message: 'Internal server error' });
+  res.status(500).json({ success: false, message: "Internal server error" });
 });
 
 /* Start server */

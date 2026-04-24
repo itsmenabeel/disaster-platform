@@ -1,4 +1,3 @@
-// src/pages/volunteer/NearbyMap.jsx
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -11,22 +10,15 @@ import {
 import "leaflet/dist/leaflet.css";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
-
 import useGPS from "../../hooks/useGPS.js";
+
 import ControlBar from "../../components/ControlBar.jsx";
 import MapOverlays from "../../components/Mapoverlays.jsx";
 import MapLegend from "../../components/Maplegend.jsx";
 import SosTooltip from "../../components/Sostooltip.jsx";
 import NavTopBar from "../../components/NavTopBar.jsx";
-import "../../css/NearbyMap.css";
 
-/* ─── Static config ──────────────────────────────────────────────── */
-const PRIORITY = {
-  critical: { color: "#e63946", label: "CRITICAL" },
-  high: { color: "#e67e22", label: "HIGH" },
-  medium: { color: "#f39c12", label: "MEDIUM" },
-  low: { color: "#2ecc71", label: "LOW" },
-};
+import "../../css/NearbyMap.css";
 
 /* ─── RecenterMap ────────────────────────────────────────────────── */
 const RecenterMap = ({ center }) => {
@@ -44,8 +36,7 @@ const RecenterMap = ({ center }) => {
   return null;
 };
 
-/* ─── NearbyMap ──────────────────────────────────────────────────── */
-const NearbyMap = () => {
+const NearbyReliefCamp = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -57,16 +48,17 @@ const NearbyMap = () => {
   const [radius, setRadius] = useState(10000);
 
   const mapRef = useRef(null);
+  const mapCenter = myCoords || [23.8103, 90.4125]; // Dhaka fallback
 
-  /* ── Fetch nearby SOS ── */
-  const loadNearby = useCallback(async () => {
+  /* ── Fetch nearby camps ── */
+  const loadNearbycamps = useCallback(async () => {
     if (!myCoords) return;
     setFetching(true);
     setFetchErr("");
     try {
       const [lat, lng] = myCoords;
       const res = await api.get(
-        `/sos/nearby?lng=${lng}&lat=${lat}&radius=${radius}`,
+        `/camps/nearby?lng=${lng}&lat=${lat}&radius=${radius}`,
       );
       setRequests(res.data.data || []);
       setUpdatedAt(new Date());
@@ -78,28 +70,21 @@ const NearbyMap = () => {
   }, [myCoords, radius]);
 
   useEffect(() => {
-    if (myCoords) loadNearby();
-  }, [myCoords, radius, loadNearby]);
+    if (myCoords) loadNearbycamps();
+  }, [myCoords, radius, loadNearbycamps]);
 
   /* ── Derived counts ── */
   const counts = {
     total: requests.length,
-    critical: requests.filter((r) => r.priority === "critical").length,
-    high: requests.filter((r) => r.priority === "high").length,
-    medium: requests.filter((r) => r.priority === "medium").length,
-    low: requests.filter((r) => r.priority === "low").length,
   };
 
-  const mapCenter = myCoords || [23.8103, 90.4125]; // Dhaka fallback
-
-  /* ── Render ── */
   return (
     <div className="nm-page">
       {/* Top bar */}
       <NavTopBar
         user={user}
-        onBack={() => navigate("/volunteer")}
-        subtitle="VOLUNTEER PORTAL — RESCUE TASK VIEW"
+        onBack={() => navigate("/victim")}
+        subtitle="VICTIM PORTAL — RELIEF CAMP VIEW"
       />
 
       <ControlBar
@@ -109,7 +94,7 @@ const NearbyMap = () => {
         fetching={fetching}
         fetchErr={fetchErr}
         updatedAt={updatedAt}
-        loadNearby={loadNearby}
+        loadNearby={loadNearbycamps}
         counts={counts}
       />
 
@@ -123,7 +108,6 @@ const NearbyMap = () => {
           radius={radius}
           onRetryGps={acquireGPS}
         />
-
         {/* Leaflet map */}
         <MapContainer
           ref={mapRef}
@@ -141,7 +125,7 @@ const NearbyMap = () => {
 
           {myCoords && <RecenterMap center={myCoords} />}
 
-          {/* Volunteer "You Are Here" */}
+          {/* Victim "You Are Here" */}
           {myCoords && (
             <CircleMarker
               center={myCoords}
@@ -159,47 +143,50 @@ const NearbyMap = () => {
             </CircleMarker>
           )}
 
-          {/* SOS request circles */}
-          {requests.map((req) => {
-            const [lng, lat] = req.location.coordinates;
-            const p = PRIORITY[req.priority] || PRIORITY.medium;
-            const urgent =
-              req.priority === "critical" || req.priority === "high";
+          {/* Camps  circles */}
+          {requests.map((camp) => {
+            const [lng, lat] = camp.location.coordinates;
+
+            const isActive = camp.isActive;
 
             return (
               <CircleMarker
-                key={req._id}
+                key={camp._id}
                 center={[lat, lng]}
-                radius={urgent ? 15 : 11}
+                radius={isActive ? 14 : 10}
                 pathOptions={{
-                  fillColor: p.color,
+                  fillColor: isActive ? "#2ecc71" : "#95a5a6", // green / gray
                   fillOpacity: 0.85,
-                  color: p.color,
-                  weight: urgent ? 3 : 2,
+                  color: isActive ? "#2ecc71" : "#95a5a6",
+                  weight: isActive ? 3 : 2,
                   opacity: 1,
                 }}
                 eventHandlers={{
-                  click: () => navigate(`/volunteer/sos/${req._id}`),
+                  click: () => navigate(`/victim/camp/${camp._id}`), // adjust route if needed
                   mouseover: (e) =>
                     e.target.setStyle({
-                      weight: urgent ? 5 : 4,
+                      weight: isActive ? 5 : 4,
                       fillOpacity: 1,
                     }),
                   mouseout: (e) =>
                     e.target.setStyle({
-                      weight: urgent ? 3 : 2,
+                      weight: isActive ? 3 : 2,
                       fillOpacity: 0.85,
                     }),
                 }}
               >
                 <Tooltip direction="top" offset={[0, -12]} className="sos-tip">
-                  <SosTooltip req={req} priorityCfg={p} lat={lat} lng={lng} />
+                  <div>
+                    <strong>{camp.name}</strong> <br />
+                    {isActive ? "🟢 Active Camp" : "⚫ Inactive Camp"} <br />
+                    Capacity: {camp.capacity} <br />
+                    Occupancy: {camp.currentOccupancy}
+                  </div>
                 </Tooltip>
               </CircleMarker>
             );
           })}
         </MapContainer>
-
         {/* My Location button */}
         {myCoords && (
           <button
@@ -214,10 +201,9 @@ const NearbyMap = () => {
         )}
 
         {/* Legend */}
-        <MapLegend role={"volunteer"} />
+        <MapLegend role={"victim"} />
       </div>
     </div>
   );
 };
-
-export default NearbyMap;
+export default NearbyReliefCamp;
