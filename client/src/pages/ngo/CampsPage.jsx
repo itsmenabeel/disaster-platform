@@ -266,6 +266,57 @@ const styles = {
     gap: "10px",
     flexWrap: "wrap",
   },
+  assignmentBox: {
+    borderTop: "1px solid var(--border)",
+    paddingTop: "14px",
+    marginTop: "14px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
+  assignmentRow: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: "10px",
+  },
+  assignBtn: {
+    background: "rgba(52, 152, 219, 0.14)",
+    color: "var(--info)",
+    border: "1px solid rgba(52, 152, 219, 0.34)",
+    borderRadius: "var(--radius)",
+    padding: "9px 14px",
+    fontSize: "0.82rem",
+  },
+  volunteerList: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+  },
+  volunteerChip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    background: "rgba(46, 204, 113, 0.1)",
+    border: "1px solid rgba(46, 204, 113, 0.28)",
+    borderRadius: "999px",
+    color: "var(--success)",
+    padding: "6px 10px",
+    fontSize: "0.78rem",
+    fontWeight: 600,
+  },
+  removeVolunteerBtn: {
+    width: "18px",
+    height: "18px",
+    borderRadius: "50%",
+    background: "rgba(230,57,70,0.16)",
+    color: "#ff7c87",
+    border: "1px solid rgba(230,57,70,0.32)",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "0.68rem",
+    padding: 0,
+  },
   smallBtn: {
     background: "transparent",
     color: "var(--text-primary)",
@@ -295,6 +346,9 @@ const styles = {
 const CampsPage = () => {
   const { user, logout } = useAuth();
   const [camps, setCamps] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
+  const [assignmentSelections, setAssignmentSelections] = useState({});
+  const [assignmentLoading, setAssignmentLoading] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -308,8 +362,12 @@ const CampsPage = () => {
     setLoading(true);
     setError("");
     try {
-      const response = await api.get("/camps");
-      setCamps(response.data.data || []);
+      const [campResponse, volunteerResponse] = await Promise.all([
+        api.get("/camps"),
+        api.get("/auth/users?role=volunteer"),
+      ]);
+      setCamps(campResponse.data.data || []);
+      setVolunteers(volunteerResponse.data.data || []);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load camp data.");
     } finally {
@@ -453,6 +511,50 @@ const CampsPage = () => {
       await loadCamps();
     } catch (err) {
       setError(err.response?.data?.message || "Unable to delete camp.");
+    }
+  };
+
+  const handleAssignmentSelect = (campId, volunteerId) => {
+    setAssignmentSelections((current) => ({
+      ...current,
+      [campId]: volunteerId,
+    }));
+  };
+
+  const handleAssignVolunteer = async (campId) => {
+    const volunteerId = assignmentSelections[campId];
+    if (!volunteerId) {
+      setError("Select a volunteer before assigning.");
+      return;
+    }
+
+    setAssignmentLoading(campId);
+    setError("");
+    setSuccess("");
+    try {
+      await api.put(`/camps/${campId}/assign`, { volunteerId });
+      setSuccess("Volunteer assigned to camp.");
+      setAssignmentSelections((current) => ({ ...current, [campId]: "" }));
+      await loadCamps();
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to assign volunteer.");
+    } finally {
+      setAssignmentLoading(null);
+    }
+  };
+
+  const handleUnassignVolunteer = async (campId, volunteerId) => {
+    setAssignmentLoading(`${campId}:${volunteerId}`);
+    setError("");
+    setSuccess("");
+    try {
+      await api.put(`/camps/${campId}/unassign`, { volunteerId });
+      setSuccess("Volunteer removed from camp.");
+      await loadCamps();
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to remove volunteer.");
+    } finally {
+      setAssignmentLoading(null);
     }
   };
 
@@ -763,6 +865,88 @@ const CampsPage = () => {
                         >
                           Delete camp
                         </button>
+                      </div>
+
+                      <div style={styles.assignmentBox}>
+                        <div>
+                          <div style={styles.cellLabel}>Assigned volunteers</div>
+                          {camp.assignedVolunteers?.length ? (
+                            <div style={styles.volunteerList}>
+                              {camp.assignedVolunteers.map((volunteer) => (
+                                <span
+                                  key={volunteer._id}
+                                  style={styles.volunteerChip}
+                                >
+                                  {volunteer.name}
+                                  <button
+                                    type="button"
+                                    style={styles.removeVolunteerBtn}
+                                    title={`Remove ${volunteer.name}`}
+                                    disabled={
+                                      assignmentLoading ===
+                                      `${camp._id}:${volunteer._id}`
+                                    }
+                                    onClick={() =>
+                                      handleUnassignVolunteer(
+                                        camp._id,
+                                        volunteer._id,
+                                      )
+                                    }
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <div style={styles.cellValue}>
+                              No volunteers assigned yet.
+                            </div>
+                          )}
+                        </div>
+
+                        <div style={styles.assignmentRow}>
+                          <div className="field">
+                            <select
+                              value={assignmentSelections[camp._id] || ""}
+                              onChange={(event) =>
+                                handleAssignmentSelect(
+                                  camp._id,
+                                  event.target.value,
+                                )
+                              }
+                            >
+                              <option value="">Select volunteer</option>
+                              {volunteers.map((volunteer) => {
+                                const alreadyAssigned =
+                                  camp.assignedVolunteers?.some(
+                                    (assigned) =>
+                                      assigned._id === volunteer._id,
+                                  );
+                                return (
+                                  <option
+                                    key={volunteer._id}
+                                    value={volunteer._id}
+                                    disabled={alreadyAssigned}
+                                  >
+                                    {volunteer.name}
+                                    {alreadyAssigned ? " (assigned)" : ""}
+                                  </option>
+                                );
+                              })}
+                            </select>
+                          </div>
+                          <button
+                            type="button"
+                            style={styles.assignBtn}
+                            disabled={assignmentLoading === camp._id}
+                            onClick={() => handleAssignVolunteer(camp._id)}
+                          >
+                            {assignmentLoading === camp._id
+                              ? "Assigning..."
+                              : "Assign"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

@@ -1,5 +1,6 @@
 const Camp = require("../models/Camp");
 const Inventory = require("../models/Inventory");
+const User = require("../models/User");
 
 const buildLocation = (coordinates = []) => ({
   type: "Point",
@@ -134,6 +135,14 @@ const deleteCamp = async (req, res) => {
 const assignVolunteer = async (req, res) => {
   try {
     const { volunteerId } = req.body;
+
+    const volunteer = await User.findOne({ _id: volunteerId, role: "volunteer" });
+    if (!volunteer) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Selected volunteer was not found" });
+    }
+
     const camp = await Camp.findOneAndUpdate(
       { _id: req.params.id, ngo: req.user._id },
       { $addToSet: { assignedVolunteers: volunteerId } },
