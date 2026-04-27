@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "../css/TrackRescue.css";
 import "../css/ProfilePage.css";
 import { useAuth } from "../context/AuthContext";
+import NotificationBell from "./NotificationBell";
 
 const NavTopBar = ({ onBack, user, subtitle }) => {
   const location = useLocation();
@@ -21,6 +22,8 @@ const NavTopBar = ({ onBack, user, subtitle }) => {
       </div>
 
       <div className="pr-top-bar__right">
+        {user && <NotificationBell user={user} />}
+
         {user?.name && (
           <div
             className="userInfo"

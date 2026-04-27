@@ -5,7 +5,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
   .get(protect, getNotifications)
-  .post(protect, createNotification);
+  .post(protect, authorize('admin'), createNotification);
 router.put('/:id/read', protect, markAsRead);
 
 module.exports = router;

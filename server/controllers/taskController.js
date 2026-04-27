@@ -78,14 +78,16 @@ const updateTaskStatus = async (req, res) => {
         .json({ success: false, message: "Not authorized" });
     }
 
-    task.status = status;
     if (status === "completed") {
-      task.completedAt = Date.now();
-      await SOSRequest.findByIdAndUpdate(task.sosRequest, {
-        status: "rescued",
-        resolvedAt: Date.now(),
+      return res.status(400).json({
+        success: false,
+        message:
+          "Use the distribution submission flow to complete a task and record delivered items.",
       });
-    } else if (status === "on_the_way") {
+    }
+
+    task.status = status;
+    if (status === "on_the_way") {
       await SOSRequest.findByIdAndUpdate(task.sosRequest, {
         status: "on_the_way",
       });

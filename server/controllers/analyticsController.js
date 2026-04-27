@@ -26,6 +26,10 @@ const getDashboardAnalytics = async (req, res) => {
       { $group: { _id: null, avgResponseTime: { $avg: '$responseMinutes' } } },
     ]);
 
+    const requestsByPriority = await SOSRequest.aggregate([
+      { $group: { _id: '$priority', count: { $sum: 1 } } },
+    ]);
+
     // 3. Volunteer activity (tasks completed per volunteer, top 10)
     const volunteerActivity = await Task.aggregate([
       { $match: { status: 'completed' } },
@@ -44,24 +48,18 @@ const getDashboardAnalytics = async (req, res) => {
       { $project: { name: '$volunteer.name', completedTasks: 1 } },
     ]);
 
-    // 4. Distribution by category (total quantity distributed per item category)
-    const distributionByCategory = await Distribution.aggregate([
+    // 4. Distribution by item/resource name
+    const distributionByItem = await Distribution.aggregate([
       { $unwind: '$items' },
       {
-        $lookup: {
-          from: 'inventories',
-          localField: 'items.inventoryItem',
-          foreignField: '_id',
-          as: 'inventory',
-        },
-      },
-      { $unwind: { path: '$inventory', preserveNullAndEmpty: true } },
-      {
         $group: {
-          _id: '$inventory.category',
+          _id: {
+            $ifNull: ['$items.itemName', 'Unknown'],
+          },
           totalDistributed: { $sum: '$items.quantity' },
         },
       },
+      { $sort: { totalDistributed: -1 } },
     ]);
 
     // Summary counts
@@ -75,9 +73,10 @@ const getDashboardAnalytics = async (req, res) => {
       data: {
         summary: { totalRequests, rescuedCount, pendingCount, volunteerCount },
         requestsByStatus,
+        requestsByPriority,
         avgResponseTime: responseTimes[0]?.avgResponseTime?.toFixed(1) || 0,
         volunteerActivity,
-        distributionByCategory,
+        distributionByItem,
       },
     });
   } catch (error) {
