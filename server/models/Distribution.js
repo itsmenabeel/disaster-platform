@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 
 const distributionSchema = new mongoose.Schema(
   {
-    ngo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    ngo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    volunteerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    victimId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     camp: { type: mongoose.Schema.Types.ObjectId, ref: 'Camp' },
     recipient: { type: String, required: true }, // name (victim may not be registered)
     recipientUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
@@ -14,6 +16,8 @@ const distributionSchema = new mongoose.Schema(
         unit: { type: String },
       },
     ],
+    quantity: { type: Number, default: 0 },
+    date: { type: Date, default: Date.now },
     distributedAt: { type: Date, default: Date.now },
     notes: { type: String },
   },

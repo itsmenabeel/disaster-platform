@@ -42,7 +42,17 @@ const createIncident = async (req, res) => {
 // @access  Private (admin)
 const updateIncident = async (req, res) => {
   try {
-    const incident = await Incident.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = { ...req.body };
+
+    if (Array.isArray(req.body.coordinates) && req.body.coordinates.length === 2) {
+      updateData.location = { type: 'Point', coordinates: req.body.coordinates };
+      delete updateData.coordinates;
+    }
+
+    const incident = await Incident.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+      runValidators: true,
+    });
     if (!incident) return res.status(404).json({ success: false, message: 'Incident not found' });
     res.json({ success: true, data: incident });
   } catch (error) {
@@ -50,4 +60,20 @@ const updateIncident = async (req, res) => {
   }
 };
 
-module.exports = { getIncidents, createIncident, updateIncident };
+// @desc    Delete incident
+// @route   DELETE /api/incidents/:id
+// @access  Private (admin)
+const deleteIncident = async (req, res) => {
+  try {
+    const incident = await Incident.findByIdAndDelete(req.params.id);
+    if (!incident) {
+      return res.status(404).json({ success: false, message: 'Incident not found' });
+    }
+
+    res.json({ success: true, message: 'Incident deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getIncidents, createIncident, updateIncident, deleteIncident };

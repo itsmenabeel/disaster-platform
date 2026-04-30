@@ -217,6 +217,49 @@ const FitToRequests = ({ requests }) => {
 const formatTime = (value) =>
   value ? new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Never";
 
+const styles = {
+  page: { minHeight: "100vh", background: "var(--bg-base)" },
+  content: {
+    maxWidth: "980px",
+    margin: "0 auto",
+    padding: "40px 24px 60px",
+  },
+  heading: {
+    fontFamily: "Oswald, sans-serif",
+    fontSize: "2rem",
+    marginBottom: "8px",
+  },
+  subheading: {
+    color: "var(--text-secondary)",
+    marginBottom: "28px",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "14px",
+  },
+  card: {
+    display: "block",
+    textDecoration: "none",
+    borderRadius: "var(--radius-lg)",
+    border: "1px solid var(--border)",
+    background: "var(--bg-surface)",
+    padding: "22px",
+    color: "var(--text-primary)",
+    boxShadow: "var(--shadow)",
+  },
+  title: {
+    fontFamily: "Oswald, sans-serif",
+    fontSize: "1.2rem",
+    marginBottom: "8px",
+  },
+  text: {
+    color: "var(--text-secondary)",
+    fontSize: "0.88rem",
+    lineHeight: 1.5,
+  },
+};
+
 const NGODashboard = () => {
   const { user } = useAuth();
   const [requests, setRequests] = useState([]);

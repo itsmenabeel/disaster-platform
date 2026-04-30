@@ -4,6 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import NavTopBar from "../../components/NavTopBar";
 import MessageThread from "../../components/MessageThread.jsx";
+import PriorityBadge from "../../components/PriorityBadge";
+import { sortByPriorityDesc } from "../../utils/priority";
 
 /* ─── Status config ─── */
 const STATUS_META = {
@@ -275,6 +277,52 @@ const styles = {
     fontSize: "0.875rem",
     marginBottom: "16px",
   },
+  distributionForm: {
+    padding: "16px 20px",
+    borderTop: "1px solid var(--border)",
+    background: "rgba(46,204,113,0.06)",
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) 140px auto auto",
+    gap: "10px",
+    alignItems: "end",
+  },
+  distributionField: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  distributionLabel: {
+    fontSize: "0.72rem",
+    color: "var(--text-muted)",
+    fontFamily: "IBM Plex Mono, monospace",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+  },
+  distributionInput: {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: "var(--radius)",
+    border: "1px solid var(--border)",
+    background: "var(--bg-surface)",
+    color: "var(--text-primary)",
+  },
+  distributionSubmit: {
+    padding: "10px 16px",
+    borderRadius: "var(--radius)",
+    border: "1px solid rgba(46,204,113,0.35)",
+    background: "rgba(46,204,113,0.18)",
+    color: "#2ecc71",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  distributionCancel: {
+    padding: "10px 16px",
+    borderRadius: "var(--radius)",
+    border: "1px solid var(--border)",
+    background: "var(--bg-surface)",
+    color: "var(--text-secondary)",
+    cursor: "pointer",
+  },
 };
 
 /* ─── Progress timeline helper ─── */
@@ -325,6 +373,11 @@ const MyTasks = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState(null); // task id being acted on
+  const [completionTaskId, setCompletionTaskId] = useState(null);
+  const [distributionForm, setDistributionForm] = useState({
+    items: "",
+    quantity: 1,
+  });
 
   const fetchTasks = () => {
     setLoading(true);
@@ -352,6 +405,11 @@ const MyTasks = () => {
   };
 
   const handleStatusUpdate = async (taskId, status) => {
+    if (status === "completed") {
+      setCompletionTaskId(taskId);
+      return;
+    }
+
     setActionLoading(taskId);
     try {
       await api.put(`/tasks/${taskId}/status`, { status });
@@ -363,8 +421,34 @@ const MyTasks = () => {
     }
   };
 
-  const filtered =
-    filter === "all" ? tasks : tasks.filter((t) => t.status === filter);
+  const handleDistributionSubmit = async (taskId) => {
+    setActionLoading(taskId);
+
+    try {
+      await api.post("/distribution", {
+        taskId,
+        items: distributionForm.items,
+        quantity: Number(distributionForm.quantity),
+      });
+
+      setCompletionTaskId(null);
+      setDistributionForm({ items: "", quantity: 1 });
+      fetchTasks();
+    } catch (err) {
+      alert(err.response?.data?.message || "Distribution submission failed.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const filtered = sortByPriorityDesc(
+    filter === "all" ? tasks : tasks.filter((t) => t.status === filter),
+    (task) => task.sosRequest?.priority,
+    (task) =>
+      task.sosRequest?.createdAt ||
+      task.createdAt ||
+      task.sosRequest?.date,
+  );
   const isActing = (id) => actionLoading === id;
 
   return (
@@ -525,6 +609,7 @@ const MyTasks = () => {
                           >
                             {sos.priority}
                           </span>
+                          <PriorityBadge priority={sos.priority} />
                         </div>
                       )}
                       {task.acceptedAt && (
@@ -596,6 +681,62 @@ const MyTasks = () => {
                 )}
 
                 {/* Action footer — only for actionable statuses */}
+                {completionTaskId === task._id && task.status === "on_the_way" && (
+                  <div style={styles.distributionForm}>
+                    <div style={styles.distributionField}>
+                      <label style={styles.distributionLabel}>Items</label>
+                      <input
+                        type="text"
+                        style={styles.distributionInput}
+                        placeholder="Rice, water, medicine"
+                        value={distributionForm.items}
+                        onChange={(event) =>
+                          setDistributionForm((current) => ({
+                            ...current,
+                            items: event.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <div style={styles.distributionField}>
+                      <label style={styles.distributionLabel}>Quantity</label>
+                      <input
+                        type="number"
+                        min="1"
+                        style={styles.distributionInput}
+                        value={distributionForm.quantity}
+                        onChange={(event) =>
+                          setDistributionForm((current) => ({
+                            ...current,
+                            quantity: event.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      style={styles.distributionSubmit}
+                      disabled={busy}
+                      onClick={() => handleDistributionSubmit(task._id)}
+                    >
+                      {busy ? "Saving..." : "Submit"}
+                    </button>
+
+                    <button
+                      type="button"
+                      style={styles.distributionCancel}
+                      onClick={() => {
+                        setCompletionTaskId(null);
+                        setDistributionForm({ items: "", quantity: 1 });
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+
                 {(task.status === "pending" || nextStatuses.length > 0) && (
                   <div style={styles.cardFooter}>
                     {task.status === "pending" && (
