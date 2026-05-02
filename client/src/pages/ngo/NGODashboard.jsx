@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import {
   CircleMarker,
@@ -215,50 +221,55 @@ const FitToRequests = ({ requests }) => {
 };
 
 const formatTime = (value) =>
-  value ? new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Never";
+  value
+    ? new Date(value).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Never";
 
-const styles = {
-  page: { minHeight: "100vh", background: "var(--bg-base)" },
-  content: {
-    maxWidth: "980px",
-    margin: "0 auto",
-    padding: "40px 24px 60px",
-  },
-  heading: {
-    fontFamily: "Oswald, sans-serif",
-    fontSize: "2rem",
-    marginBottom: "8px",
-  },
-  subheading: {
-    color: "var(--text-secondary)",
-    marginBottom: "28px",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "14px",
-  },
-  card: {
-    display: "block",
-    textDecoration: "none",
-    borderRadius: "var(--radius-lg)",
-    border: "1px solid var(--border)",
-    background: "var(--bg-surface)",
-    padding: "22px",
-    color: "var(--text-primary)",
-    boxShadow: "var(--shadow)",
-  },
-  title: {
-    fontFamily: "Oswald, sans-serif",
-    fontSize: "1.2rem",
-    marginBottom: "8px",
-  },
-  text: {
-    color: "var(--text-secondary)",
-    fontSize: "0.88rem",
-    lineHeight: 1.5,
-  },
-};
+// const styles = {
+//   page: { minHeight: "100vh", background: "var(--bg-base)" },
+//   content: {
+//     maxWidth: "980px",
+//     margin: "0 auto",
+//     padding: "40px 24px 60px",
+//   },
+//   heading: {
+//     fontFamily: "Oswald, sans-serif",
+//     fontSize: "2rem",
+//     marginBottom: "8px",
+//   },
+//   subheading: {
+//     color: "var(--text-secondary)",
+//     marginBottom: "28px",
+//   },
+//   grid: {
+//     display: "grid",
+//     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+//     gap: "14px",
+//   },
+//   card: {
+//     display: "block",
+//     textDecoration: "none",
+//     borderRadius: "var(--radius-lg)",
+//     border: "1px solid var(--border)",
+//     background: "var(--bg-surface)",
+//     padding: "22px",
+//     color: "var(--text-primary)",
+//     boxShadow: "var(--shadow)",
+//   },
+//   title: {
+//     fontFamily: "Oswald, sans-serif",
+//     fontSize: "1.2rem",
+//     marginBottom: "8px",
+//   },
+//   text: {
+//     color: "var(--text-secondary)",
+//     fontSize: "0.88rem",
+//     lineHeight: 1.5,
+//   },
+// };
 
 const NGODashboard = () => {
   const { user } = useAuth();
@@ -316,7 +327,8 @@ const NGODashboard = () => {
         ["pending", "assigned", "on_the_way"].includes(request.status),
       ).length,
       pending: byStatus.pending || 0,
-      critical: requests.filter((request) => request.priority === "critical").length,
+      critical: requests.filter((request) => request.priority === "critical")
+        .length,
       rescued: byStatus.rescued || 0,
     };
   }, [requests]);
@@ -433,12 +445,16 @@ const NGODashboard = () => {
 
                 {requests.map((request) => {
                   const coords = request.location?.coordinates;
-                  if (!Array.isArray(coords) || coords.length !== 2) return null;
+                  if (!Array.isArray(coords) || coords.length !== 2)
+                    return null;
                   const [lng, lat] = coords;
-                  const status = STATUS_META[request.status] || STATUS_META.pending;
-                  const priority = PRIORITY_META[request.priority] || PRIORITY_META.medium;
+                  const status =
+                    STATUS_META[request.status] || STATUS_META.pending;
+                  const priority =
+                    PRIORITY_META[request.priority] || PRIORITY_META.medium;
                   const isUrgent =
-                    request.priority === "critical" || request.priority === "high";
+                    request.priority === "critical" ||
+                    request.priority === "high";
 
                   return (
                     <CircleMarker
@@ -452,9 +468,15 @@ const NGODashboard = () => {
                         weight: isUrgent ? 4 : 2,
                       }}
                     >
-                      <Tooltip direction="top" offset={[0, -12]} className="sos-tip">
+                      <Tooltip
+                        direction="top"
+                        offset={[0, -12]}
+                        className="sos-tip"
+                      >
                         <div>
-                          <strong>#{request._id.slice(-6).toUpperCase()}</strong>
+                          <strong>
+                            #{request._id.slice(-6).toUpperCase()}
+                          </strong>
                           <br />
                           {request.needs?.join(", ") || "No needs listed"}
                           <br />
@@ -481,14 +503,17 @@ const NGODashboard = () => {
             ) : (
               <div style={styles.list}>
                 {recentRequests.map((request) => {
-                  const status = STATUS_META[request.status] || STATUS_META.pending;
+                  const status =
+                    STATUS_META[request.status] || STATUS_META.pending;
                   return (
                     <div key={request._id} style={styles.row}>
                       <span>
                         #{request._id.slice(-6).toUpperCase()} -{" "}
                         {request.needs?.join(", ") || "No needs listed"}
                       </span>
-                      <span style={{ color: status.color }}>{status.label}</span>
+                      <span style={{ color: status.color }}>
+                        {status.label}
+                      </span>
                     </div>
                   );
                 })}

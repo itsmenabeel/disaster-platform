@@ -279,7 +279,7 @@ const VolunteerDashboard = () => {
             },
             {
               to: "/incidents",
-              icon: "ðŸ“š",
+              icon: "⌛",
               color: "#f39c12",
               title: "INCIDENT HISTORY",
               desc: "Review archived incident reports and field context",
