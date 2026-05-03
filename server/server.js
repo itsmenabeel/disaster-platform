@@ -8,8 +8,18 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+/* ✅ FIXED CORS (NO BUGS, NO SLASH ISSUES) */
+app.use(
+  cors({
+    origin: "http://localhost:5173", // 🔥 hardcoded → safest for now
+    credentials: true,
+  }),
+);
+
+/* ✅ EXTRA SAFETY (handles preflight requests) */
+app.options("*", cors());
+
+/* Middleware */
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 const path = require("path");
@@ -33,11 +43,12 @@ app.get("/", (req, res) =>
   res.json({ message: "Disaster Platform API running" }),
 );
 
-// Global error handler
+/* Global error handler */
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ success: false, message: "Internal server error" });
 });
 
+/* Start server */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

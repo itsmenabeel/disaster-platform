@@ -29,13 +29,13 @@ import SOSDetailPage from "./pages/volunteer/SOSDetailPage";
 import NGODashboard from "./pages/ngo/NGODashboard";
 import InventoryPage from "./pages/ngo/InventoryPage";
 import CampsPage from "./pages/ngo/CampsPage";
-import DistributionPage from "./pages/ngo/DistributionPage";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import IncidentsPage from "./pages/admin/IncidentsPage";
 import BroadcastPage from "./pages/admin/BroadcastPage";
 import ReportsPage from "./pages/admin/ReportsPage";
+import DistributionMonitorPage from "./pages/admin/DistributionMonitorPage";
 
 // Role-based protected route
 const ProtectedRoute = ({ children, roles }) => {
@@ -135,7 +135,7 @@ const App = () => (
         <Route
           path="/volunteer/map"
           element={
-            <ProtectedRoute roles={["volunteer"]}>
+            <ProtectedRoute roles={["volunteer", "admin"]}>
               <NearbyMap />
             </ProtectedRoute>
           }
@@ -190,10 +190,10 @@ const App = () => (
           }
         />
         <Route
-          path="/ngo/distribution"
+          path="/incidents"
           element={
-            <ProtectedRoute roles={["ngo"]}>
-              <DistributionPage />
+            <ProtectedRoute roles={["victim", "volunteer", "ngo", "admin"]}>
+              <IncidentsPage />
             </ProtectedRoute>
           }
         />
@@ -227,6 +227,14 @@ const App = () => (
           element={
             <ProtectedRoute roles={["admin"]}>
               <ReportsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/distribution"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <DistributionMonitorPage />
             </ProtectedRoute>
           }
         />

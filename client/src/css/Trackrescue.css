@@ -37,6 +37,9 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
+    position: relative;
+    z-index: 1000;
+    overflow: visible;
 }
 
 .tr-top-bar__left {

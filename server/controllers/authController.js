@@ -93,6 +93,25 @@ const getUserById = async (req, res) => {
   }
 };
 
+// @desc    List users by role for coordination screens
+// @route   GET /api/auth/users?role=volunteer
+// @access  Private (ngo, admin)
+const listUsers = async (req, res) => {
+  try {
+    const { role } = req.query;
+    const allowedRoles = ["victim", "volunteer", "ngo", "admin"];
+    const filter = role && allowedRoles.includes(role) ? { role } : {};
+
+    const users = await User.find(filter)
+      .select("name email phone role isAvailable reliabilityScore totalRatings")
+      .sort({ name: 1 });
+
+    res.json({ success: true, data: users });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 // @desc    Update account info
 // @route   PUT /api/auth/me
 // @access  Private
@@ -200,4 +219,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getUserById,
+  listUsers,
 };

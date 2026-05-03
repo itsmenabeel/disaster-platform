@@ -47,12 +47,14 @@ const createSOS = async (req, res) => {
   }
 };
 
-// @desc    Get SOS requests (victim sees own; admin sees all)
+// @desc    Get SOS requests (victim sees own; admin/NGO see all)
 // @route   GET /api/sos
 // @access  Private
 const getSOSRequests = async (req, res) => {
   try {
-    const filter = req.user.role === "admin" ? {} : { victim: req.user._id };
+    const filter = ["admin", "ngo"].includes(req.user.role)
+      ? {}
+      : { victim: req.user._id };
     const requests = await SOSRequest.find(filter)
       .populate("victim", "name phone")
       .populate("assignedVolunteer", "name phone")
