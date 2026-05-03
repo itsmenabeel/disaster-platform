@@ -1,0 +1,207 @@
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes borderPulse {
+  0%,
+  100% {
+    border-color: rgba(230, 57, 70, 0.3);
+  }
+  50% {
+    border-color: rgba(230, 57, 70, 0.8);
+  }
+}
+
+.lp-nav-link {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: #8892a4;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.18s ease;
+}
+
+.lp-nav-link:hover {
+  color: #eef0f4;
+}
+
+.lp-feature-card,
+.lp-role-card,
+.lp-testimonial-card {
+  background: #111318;
+  border: 1px solid #2a2f3a;
+  border-radius: 10px;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.lp-feature-card {
+  padding: 28px 24px;
+  cursor: default;
+}
+
+.lp-feature-card:hover {
+  border-color: rgba(230, 57, 70, 0.5);
+  transform: translateY(-3px);
+}
+
+.lp-role-card {
+  padding: 24px;
+}
+
+.lp-role-card:hover {
+  border-color: rgba(230, 57, 70, 0.4);
+  background: #14171e;
+}
+
+.lp-testimonial-card {
+  border-radius: 12px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.lp-testimonial-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+}
+
+.lp-cta-btn,
+.lp-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  border-radius: 6px;
+  font-family: "Oswald", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.lp-cta-btn {
+  background: #e63946;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.lp-cta-btn:hover {
+  background: #ff4757;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(230, 57, 70, 0.4);
+  color: #fff;
+}
+
+.lp-cta-ghost {
+  background: transparent;
+  color: #eef0f4;
+  border: 1px solid #2a2f3a;
+}
+
+.lp-cta-ghost:hover {
+  border-color: #eef0f4;
+  background: rgba(255, 255, 255, 0.05);
+  color: #eef0f4;
+}
+
+.lp-stat-card {
+  border-right: 1px solid #2a2f3a;
+  padding: 0 40px;
+  animation: countUp 0.5s ease both;
+}
+
+.lp-stat-card:last-child {
+  border-right: none;
+}
+
+.lp-cta-card-victim,
+.lp-cta-card-responder {
+  border-radius: 12px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.lp-cta-card-victim {
+  background: linear-gradient(135deg, #111318 60%, rgba(230, 57, 70, 0.07) 100%);
+  border: 1px solid rgba(230, 57, 70, 0.25);
+}
+
+.lp-cta-card-victim:hover {
+  border-color: rgba(230, 57, 70, 0.55);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(230, 57, 70, 0.12);
+}
+
+.lp-cta-card-responder {
+  background: linear-gradient(135deg, #111318 60%, rgba(46, 204, 113, 0.06) 100%);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.lp-cta-card-responder:hover {
+  border-color: rgba(46, 204, 113, 0.45);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(46, 204, 113, 0.08);
+}
+
+@media (max-width: 768px) {
+  .lp-stat-card {
+    border-right: none;
+    border-bottom: 1px solid #2a2f3a;
+    padding: 20px 0;
+  }
+
+  .lp-stat-card:last-child {
+    border-bottom: none;
+  }
+}

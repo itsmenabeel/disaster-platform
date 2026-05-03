@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import NavTopBar from "../../components/NavTopBar";
-import PriorityBadge from "../../components/PriorityBadge";
 import LiveOperationsMap from "../../components/LiveOperationsMap";
-import { sortByPriorityDesc } from "../../utils/priority";
 
 const styles = {
   page: {
@@ -167,50 +165,6 @@ const styles = {
     cursor: "pointer",
     fontWeight: 600,
   },
-  list: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-  item: {
-    border: "1px solid var(--border)",
-    borderRadius: "var(--radius)",
-    padding: "14px 16px",
-    background: "var(--bg-elevated)",
-  },
-  itemTitle: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "12px",
-    marginBottom: "8px",
-  },
-  itemMeta: {
-    color: "var(--text-secondary)",
-    fontSize: "0.82rem",
-    lineHeight: 1.5,
-  },
-  priorityControl: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
-  },
-  prioritySelect: {
-    minWidth: "118px",
-    padding: "7px 10px",
-    background: "var(--bg-input)",
-    border: "1px solid var(--border)",
-    borderRadius: "var(--radius)",
-    color: "var(--text-primary)",
-    fontSize: "0.8rem",
-    fontWeight: 600,
-  },
-  empty: {
-    color: "var(--text-muted)",
-    fontSize: "0.85rem",
-  },
 };
 
 const AdminDashboard = () => {
@@ -218,7 +172,6 @@ const AdminDashboard = () => {
   const [incidents, setIncidents] = useState([]);
   const [requests, setRequests] = useState([]);
   const [analytics, setAnalytics] = useState({});
-  const [prioritySaving, setPrioritySaving] = useState(null);
   const [message, setMessage] = useState("");
   const [newIncident, setNewIncident] = useState({
     title: "",
@@ -247,12 +200,6 @@ const AdminDashboard = () => {
     const interval = setInterval(() => loadData().catch(console.error), 10000);
     return () => clearInterval(interval);
   }, [loadData]);
-
-  const sortedRequests = sortByPriorityDesc(
-    requests,
-    (request) => request.priority,
-    (request) => request.createdAt || request.date,
-  );
 
   const createIncident = async () => {
     try {
@@ -303,29 +250,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const updateRequestPriority = async (requestId, priority) => {
-    setPrioritySaving(requestId);
-
-    try {
-      const response = await api.put(`/sos/${requestId}/priority`, {
-        priority,
-      });
-      const updatedRequest = response.data.data;
-
-      setRequests((current) =>
-        current.map((request) =>
-          request._id === requestId
-            ? { ...request, priority: updatedRequest.priority }
-            : request,
-        ),
-      );
-    } catch (error) {
-      alert(error.response?.data?.message || "Failed to update priority");
-    } finally {
-      setPrioritySaving(null);
-    }
-  };
-
   return (
     <div style={styles.page}>
       <NavTopBar user={user} subtitle="ADMIN PORTAL" />
@@ -345,6 +269,12 @@ const AdminDashboard = () => {
           </Link>
           <Link to="/admin/reports" style={styles.actionLink}>
             Analytics
+          </Link>
+          <Link to="/admin/priority-requests" style={styles.actionLink}>
+            Priority Requests
+          </Link>
+          <Link to="/admin/recent-incidents" style={styles.actionLink}>
+            Recent Incidents
           </Link>
         </div>
 
@@ -466,77 +396,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div style={styles.lowerSectionGrid}>
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>Priority Requests</div>
-            {requests.length === 0 ? (
-              <div style={styles.empty}>No SOS requests found.</div>
-            ) : (
-              <div style={styles.list}>
-                {sortedRequests.slice(0, 6).map((request) => (
-                  <div key={request._id} style={styles.item}>
-                    <div style={styles.itemTitle}>
-                      <strong>{request.needs?.join(", ") || "Request"}</strong>
-                      <div style={styles.priorityControl}>
-                        <PriorityBadge priority={request.priority} />
-                        <select
-                          style={styles.prioritySelect}
-                          value={request.priority || "medium"}
-                          disabled={prioritySaving === request._id}
-                          onChange={(event) =>
-                            updateRequestPriority(
-                              request._id,
-                              event.target.value,
-                            )
-                          }
-                        >
-                          <option value="critical">Critical</option>
-                          <option value="high">High</option>
-                          <option value="medium">Medium</option>
-                          <option value="low">Low</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div style={styles.itemMeta}>
-                      Victim: {request.victim?.name || "Unknown"}
-                      <br />
-                      Status: {request.status}
-                      <br />
-                      Location: {request.address || "Not provided"}
-                      <br />
-                      Date: {new Date(request.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>Recent Incidents</div>
-            {incidents.length === 0 ? (
-              <div style={styles.empty}>No incidents found.</div>
-            ) : (
-              <div style={styles.list}>
-                {incidents.slice(0, 5).map((incident) => (
-                  <div key={incident._id} style={styles.item}>
-                    <div style={styles.itemTitle}>
-                      <strong>{incident.title}</strong>
-                      <span>{new Date(incident.startDate).toLocaleDateString()}</span>
-                    </div>
-                    <div style={styles.itemMeta}>
-                      Type: {incident.disasterType}
-                      <br />
-                      Location: {incident.address || "Not provided"}
-                      <br />
-                      Description: {incident.description || "N/A"}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
