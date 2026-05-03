@@ -29,6 +29,7 @@ import SOSDetailPage from "./pages/volunteer/SOSDetailPage";
 import NGODashboard from "./pages/ngo/NGODashboard";
 import InventoryPage from "./pages/ngo/InventoryPage";
 import CampsPage from "./pages/ngo/CampsPage";
+import DistributionPage from "./pages/ngo/DistributionPage";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -186,6 +187,14 @@ const App = () => (
           element={
             <ProtectedRoute roles={["ngo"]}>
               <CampsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ngo/distribution"
+          element={
+            <ProtectedRoute roles={["ngo"]}>
+              <DistributionPage />
             </ProtectedRoute>
           }
         />

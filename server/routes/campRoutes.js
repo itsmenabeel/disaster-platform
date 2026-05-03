@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getNearbyCamps,
   getCamps,
+  getMyAssignedCamps,
   createCamp,
   updateCamp,
   deleteCamp,
@@ -12,6 +13,7 @@ const {
 const { protect, authorize } = require("../middleware/auth");
 
 router.get("/nearby", protect, authorize("victim", "admin"), getNearbyCamps);
+router.get("/my-assigned", protect, authorize("volunteer"), getMyAssignedCamps);
 
 router
   .route("/")
