@@ -277,13 +277,7 @@ const VolunteerDashboard = () => {
               title: "NEARBY MAP",
               desc: "Browse SOS requests near your location",
             },
-            {
-              to: "/incidents",
-              icon: "⌛",
-              color: "#f39c12",
-              title: "INCIDENT HISTORY",
-              desc: "Review archived incident reports and field context",
-            },
+            
           ].map((c) => (
             <Link
               key={c.to}
