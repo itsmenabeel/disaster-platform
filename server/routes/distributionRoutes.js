@@ -4,7 +4,7 @@ const { createDistribution, getDistributions } = require('../controllers/distrib
 const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
-  .get(protect, authorize('admin'), getDistributions)
+  .get(protect, authorize('admin', 'ngo'), getDistributions)
   .post(protect, authorize('volunteer'), createDistribution);
 
 module.exports = router;

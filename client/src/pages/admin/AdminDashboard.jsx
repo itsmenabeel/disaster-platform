@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import NavTopBar from "../../components/NavTopBar";
 import PriorityBadge from "../../components/PriorityBadge";
+import LiveOperationsMap from "../../components/LiveOperationsMap";
 import { sortByPriorityDesc } from "../../utils/priority";
 
 const styles = {
@@ -189,6 +190,23 @@ const styles = {
     fontSize: "0.82rem",
     lineHeight: 1.5,
   },
+  priorityControl: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  },
+  prioritySelect: {
+    minWidth: "118px",
+    padding: "7px 10px",
+    background: "var(--bg-input)",
+    border: "1px solid var(--border)",
+    borderRadius: "var(--radius)",
+    color: "var(--text-primary)",
+    fontSize: "0.8rem",
+    fontWeight: 600,
+  },
   empty: {
     color: "var(--text-muted)",
     fontSize: "0.85rem",
@@ -200,6 +218,7 @@ const AdminDashboard = () => {
   const [incidents, setIncidents] = useState([]);
   const [requests, setRequests] = useState([]);
   const [analytics, setAnalytics] = useState({});
+  const [prioritySaving, setPrioritySaving] = useState(null);
   const [message, setMessage] = useState("");
   const [newIncident, setNewIncident] = useState({
     title: "",
@@ -209,21 +228,25 @@ const AdminDashboard = () => {
     startDate: "",
   });
 
-  const loadData = async () => {
-    const [incidentRes, analyticsRes, sosRes] = await Promise.all([
+  const loadData = useCallback(async () => {
+    const [incidentRes, analyticsRes] = await Promise.all([
       api.get("/incidents"),
       api.get("/analytics/admin-summary"),
-      api.get("/sos"),
     ]);
 
     setIncidents(incidentRes.data.data || []);
     setAnalytics(analyticsRes.data || {});
-    setRequests(sosRes.data.data || []);
-  };
+  }, []);
+
+  const handleMapData = useCallback(({ requests: nextRequests }) => {
+    setRequests(nextRequests);
+  }, []);
 
   useEffect(() => {
     loadData().catch(console.error);
-  }, []);
+    const interval = setInterval(() => loadData().catch(console.error), 10000);
+    return () => clearInterval(interval);
+  }, [loadData]);
 
   const sortedRequests = sortByPriorityDesc(
     requests,
@@ -280,6 +303,29 @@ const AdminDashboard = () => {
     }
   };
 
+  const updateRequestPriority = async (requestId, priority) => {
+    setPrioritySaving(requestId);
+
+    try {
+      const response = await api.put(`/sos/${requestId}/priority`, {
+        priority,
+      });
+      const updatedRequest = response.data.data;
+
+      setRequests((current) =>
+        current.map((request) =>
+          request._id === requestId
+            ? { ...request, priority: updatedRequest.priority }
+            : request,
+        ),
+      );
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to update priority");
+    } finally {
+      setPrioritySaving(null);
+    }
+  };
+
   return (
     <div style={styles.page}>
       <NavTopBar user={user} subtitle="ADMIN PORTAL" />
@@ -302,31 +348,6 @@ const AdminDashboard = () => {
           </Link>
         </div>
 
-        <div style={styles.navGrid}>
-          <Link
-            to="/volunteer/map"
-            style={styles.navCard("#3498db")}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#3498db60";
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
-          >
-            <div style={styles.navIcon("#3498db")}>🗺️</div>
-            <div>
-              <div style={{ ...styles.navTitle, color: "#3498db" }}>
-                NEARBY MAP
-              </div>
-              <div style={styles.navDesc}>
-                Browse SOS requests near your location
-              </div>
-            </div>
-          </Link>
-        </div>
-
         <div style={styles.statsRow}>
           <div style={styles.statCard}>
             <div style={styles.statValue}>{analytics.total || 0}</div>
@@ -344,6 +365,13 @@ const AdminDashboard = () => {
             <div style={styles.statValue}>{requests.length}</div>
             <div style={styles.statLabel}>SOS Requests</div>
           </div>
+        </div>
+
+        <div style={{ marginBottom: "24px" }}>
+          <LiveOperationsMap
+            title="Live SOS And Camp Map"
+            onData={handleMapData}
+          />
         </div>
 
         <div style={styles.sectionGrid}>
@@ -449,7 +477,25 @@ const AdminDashboard = () => {
                   <div key={request._id} style={styles.item}>
                     <div style={styles.itemTitle}>
                       <strong>{request.needs?.join(", ") || "Request"}</strong>
-                      <PriorityBadge priority={request.priority} />
+                      <div style={styles.priorityControl}>
+                        <PriorityBadge priority={request.priority} />
+                        <select
+                          style={styles.prioritySelect}
+                          value={request.priority || "medium"}
+                          disabled={prioritySaving === request._id}
+                          onChange={(event) =>
+                            updateRequestPriority(
+                              request._id,
+                              event.target.value,
+                            )
+                          }
+                        >
+                          <option value="critical">Critical</option>
+                          <option value="high">High</option>
+                          <option value="medium">Medium</option>
+                          <option value="low">Low</option>
+                        </select>
+                      </div>
                     </div>
                     <div style={styles.itemMeta}>
                       Victim: {request.victim?.name || "Unknown"}

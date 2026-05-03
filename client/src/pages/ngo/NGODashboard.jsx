@@ -2,24 +2,17 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { Link } from "react-router-dom";
-import {
-  CircleMarker,
-  MapContainer,
-  TileLayer,
-  Tooltip,
-  useMap,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import NavTopBar from "../../components/NavTopBar";
 import HeaderTag from "../../components/HeaderTag";
-import "../../css/NearbyMap.css";
+import PriorityBadge from "../../components/PriorityBadge";
+import LiveOperationsMap from "../../components/LiveOperationsMap";
+import { sortByPriorityDesc } from "../../utils/priority";
 
 const STATUS_META = {
   pending: { label: "Pending", color: "#f39c12" },
@@ -27,13 +20,6 @@ const STATUS_META = {
   on_the_way: { label: "On Way", color: "#9b59b6" },
   rescued: { label: "Rescued", color: "#2ecc71" },
   closed: { label: "Closed", color: "#8892a4" },
-};
-
-const PRIORITY_META = {
-  critical: { label: "Critical", color: "#e63946" },
-  high: { label: "High", color: "#e67e22" },
-  medium: { label: "Medium", color: "#f39c12" },
-  low: { label: "Low", color: "#2ecc71" },
 };
 
 const styles = {
@@ -116,47 +102,6 @@ const styles = {
     fontSize: "0.8rem",
     marginTop: "7px",
   },
-  mapPanel: {
-    background: "var(--bg-surface)",
-    border: "1px solid var(--border)",
-    borderRadius: "var(--radius-lg)",
-    overflow: "hidden",
-    boxShadow: "var(--shadow)",
-  },
-  mapHeader: {
-    padding: "16px 18px",
-    borderBottom: "1px solid var(--border)",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "14px",
-    flexWrap: "wrap",
-  },
-  mapTitle: {
-    fontFamily: "Oswald, sans-serif",
-    fontSize: "1.2rem",
-    letterSpacing: "0.04em",
-  },
-  liveNote: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    color: "var(--success)",
-    fontSize: "0.72rem",
-    fontFamily: "IBM Plex Mono, monospace",
-    letterSpacing: "0.07em",
-  },
-  liveDot: {
-    width: 7,
-    height: 7,
-    borderRadius: "50%",
-    background: "var(--success)",
-    animation: "pulse-dot 1s infinite",
-  },
-  mapWrap: {
-    height: "520px",
-    position: "relative",
-  },
   bottomGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
@@ -187,6 +132,21 @@ const styles = {
     color: "var(--text-secondary)",
     fontSize: "0.86rem",
   },
+  rowMain: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  rowTitle: {
+    color: "var(--text-primary)",
+    overflowWrap: "anywhere",
+  },
+  rowMeta: {
+    color: "var(--text-muted)",
+    fontSize: "0.76rem",
+    lineHeight: 1.45,
+  },
   empty: {
     border: "1px dashed var(--border)",
     borderRadius: "var(--radius-lg)",
@@ -195,38 +155,6 @@ const styles = {
     color: "var(--text-muted)",
   },
 };
-
-const FitToRequests = ({ requests }) => {
-  const map = useMap();
-  const hasAutoFit = useRef(false);
-
-  useEffect(() => {
-    if (hasAutoFit.current) return;
-
-    const points = requests
-      .map((request) => request.location?.coordinates)
-      .filter((coords) => Array.isArray(coords) && coords.length === 2)
-      .map(([lng, lat]) => [lat, lng]);
-
-    if (points.length === 1) {
-      map.setView(points[0], 12);
-      hasAutoFit.current = true;
-    } else if (points.length > 1) {
-      map.fitBounds(points, { padding: [42, 42] });
-      hasAutoFit.current = true;
-    }
-  }, [map, requests]);
-
-  return null;
-};
-
-const formatTime = (value) =>
-  value
-    ? new Date(value).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "Never";
 
 // const styles = {
 //   page: { minHeight: "100vh", background: "var(--bg-base)" },
@@ -276,32 +204,19 @@ const NGODashboard = () => {
   const [requests, setRequests] = useState([]);
   const [camps, setCamps] = useState([]);
   const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState("");
-  const [updatedAt, setUpdatedAt] = useState(null);
-  const mapRef = useRef(null);
 
-  const loadDashboard = useCallback(async ({ quiet = false } = {}) => {
-    if (!quiet) setLoading(true);
+  const loadDashboard = useCallback(async () => {
     setFetching(true);
     setError("");
 
     try {
-      const [sosRes, campRes, alertRes] = await Promise.all([
-        api.get("/sos"),
-        api.get("/camps"),
-        api.get("/inventory/alerts"),
-      ]);
-
-      setRequests(sosRes.data.data || []);
-      setCamps(campRes.data.data || []);
+      const alertRes = await api.get("/inventory/alerts");
       setAlerts(alertRes.data.data || []);
-      setUpdatedAt(new Date());
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load NGO dashboard.");
     } finally {
-      setLoading(false);
       setFetching(false);
     }
   }, []);
@@ -311,9 +226,17 @@ const NGODashboard = () => {
   }, [loadDashboard]);
 
   useEffect(() => {
-    const interval = setInterval(() => loadDashboard({ quiet: true }), 10000);
+    const interval = setInterval(() => loadDashboard(), 10000);
     return () => clearInterval(interval);
   }, [loadDashboard]);
+
+  const handleMapData = useCallback(
+    ({ requests: nextRequests, camps: nextCamps }) => {
+      setRequests(nextRequests);
+      setCamps(nextCamps);
+    },
+    [],
+  );
 
   const counts = useMemo(() => {
     const byStatus = requests.reduce((acc, request) => {
@@ -333,12 +256,27 @@ const NGODashboard = () => {
     };
   }, [requests]);
 
+  const sortedRequests = sortByPriorityDesc(
+    requests,
+    (request) => request.priority,
+    (request) => request.createdAt || request.updatedAt,
+  );
   const recentRequests = [...requests]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt || b.createdAt) -
+        new Date(a.updatedAt || a.createdAt),
+    )
+    .slice(0, 5);
+  const criticalAlerts = sortedRequests
+    .filter(
+      (request) =>
+        ["critical", "high"].includes(request.priority) &&
+        !["rescued", "closed"].includes(request.status),
+    )
     .slice(0, 5);
 
   const activeCamps = camps.filter((camp) => camp.isActive).length;
-  const center = [23.8103, 90.4125];
 
   return (
     <div style={styles.page}>
@@ -351,7 +289,7 @@ const NGODashboard = () => {
             <h1 style={styles.title}>Live Response Dashboard</h1>
             <p style={styles.subtitle}>
               Monitor every SOS request on the map, keep camps visible, and
-              refresh operational status automatically every 10 seconds.
+              refresh operational status automatically every 5 seconds.
             </p>
           </div>
 
@@ -410,92 +348,40 @@ const NGODashboard = () => {
           </div>
         </div>
 
-        <div style={styles.mapPanel}>
-          <div style={styles.mapHeader}>
-            <div>
-              <div style={styles.mapTitle}>All Requests On Map</div>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>
-                Last updated {formatTime(updatedAt)}
-              </div>
-            </div>
-            <div style={styles.liveNote}>
-              <span style={styles.liveDot} />
-              LIVE HTTP POLLING
-            </div>
-          </div>
-
-          <div style={styles.mapWrap}>
-            {loading ? (
-              <div style={styles.empty}>Loading live map data...</div>
-            ) : (
-              <MapContainer
-                ref={mapRef}
-                center={center}
-                zoom={7}
-                style={{ height: "100%", width: "100%" }}
-                zoomControl
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  subdomains="abcd"
-                  maxZoom={20}
-                />
-                <FitToRequests requests={requests} />
-
-                {requests.map((request) => {
-                  const coords = request.location?.coordinates;
-                  if (!Array.isArray(coords) || coords.length !== 2)
-                    return null;
-                  const [lng, lat] = coords;
-                  const status =
-                    STATUS_META[request.status] || STATUS_META.pending;
-                  const priority =
-                    PRIORITY_META[request.priority] || PRIORITY_META.medium;
-                  const isUrgent =
-                    request.priority === "critical" ||
-                    request.priority === "high";
-
-                  return (
-                    <CircleMarker
-                      key={request._id}
-                      center={[lat, lng]}
-                      radius={isUrgent ? 15 : 11}
-                      pathOptions={{
-                        fillColor: priority.color,
-                        fillOpacity: 0.84,
-                        color: status.color,
-                        weight: isUrgent ? 4 : 2,
-                      }}
-                    >
-                      <Tooltip
-                        direction="top"
-                        offset={[0, -12]}
-                        className="sos-tip"
-                      >
-                        <div>
-                          <strong>
-                            #{request._id.slice(-6).toUpperCase()}
-                          </strong>
-                          <br />
-                          {request.needs?.join(", ") || "No needs listed"}
-                          <br />
-                          Status: {status.label}
-                          <br />
-                          Priority: {priority.label}
-                          <br />
-                          Victim: {request.victim?.name || "Unknown"}
-                        </div>
-                      </Tooltip>
-                    </CircleMarker>
-                  );
-                })}
-              </MapContainer>
-            )}
-          </div>
-        </div>
+        <LiveOperationsMap
+          onData={handleMapData}
+        />
 
         <div style={styles.bottomGrid}>
+          <div style={styles.panel}>
+            <div style={styles.panelTitle}>Critical SOS Alerts</div>
+            {criticalAlerts.length === 0 ? (
+              <div style={styles.empty}>No critical or high SOS alerts.</div>
+            ) : (
+              <div style={styles.list}>
+                {criticalAlerts.map((request) => {
+                  const status =
+                    STATUS_META[request.status] || STATUS_META.pending;
+                  return (
+                    <div key={request._id} style={styles.row}>
+                      <div style={styles.rowMain}>
+                        <span style={styles.rowTitle}>
+                          #{request._id.slice(-6).toUpperCase()} -{" "}
+                          {request.needs?.join(", ") || "No needs listed"}
+                        </span>
+                        <span style={styles.rowMeta}>
+                          Victim: {request.victim?.name || "Unknown"} |{" "}
+                          {request.address || "No address"} | {status.label}
+                        </span>
+                      </div>
+                      <PriorityBadge priority={request.priority} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <div style={styles.panel}>
             <div style={styles.panelTitle}>Recent SOS Requests</div>
             {recentRequests.length === 0 ? (
@@ -507,13 +393,17 @@ const NGODashboard = () => {
                     STATUS_META[request.status] || STATUS_META.pending;
                   return (
                     <div key={request._id} style={styles.row}>
-                      <span>
-                        #{request._id.slice(-6).toUpperCase()} -{" "}
-                        {request.needs?.join(", ") || "No needs listed"}
-                      </span>
-                      <span style={{ color: status.color }}>
-                        {status.label}
-                      </span>
+                      <div style={styles.rowMain}>
+                        <span style={styles.rowTitle}>
+                          #{request._id.slice(-6).toUpperCase()} -{" "}
+                          {request.needs?.join(", ") || "No needs listed"}
+                        </span>
+                        <span style={styles.rowMeta}>
+                          Victim: {request.victim?.name || "Unknown"} |{" "}
+                          {request.address || "No address"}
+                        </span>
+                      </div>
+                      <span style={{ color: status.color }}>{status.label}</span>
                     </div>
                   );
                 })}

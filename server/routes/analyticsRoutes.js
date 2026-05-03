@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { getDashboardAnalytics, getReports } = require('../controllers/analyticsController');
+const {
+  getDashboardAnalytics,
+  getReports,
+  getLiveMapData,
+} = require('../controllers/analyticsController');
 const { protect, authorize } = require('../middleware/auth');
 const Incident = require('../models/Incident');
 
 router.get('/', protect, authorize('admin'), getDashboardAnalytics);
 router.get('/reports', protect, authorize('admin'), getReports);
+router.get('/live-map', protect, authorize('admin', 'ngo'), getLiveMapData);
 
 router.get('/admin-summary', protect, authorize('admin'), async (req, res) => {
   try {

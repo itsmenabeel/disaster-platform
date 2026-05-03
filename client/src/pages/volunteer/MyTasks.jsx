@@ -282,9 +282,23 @@ const styles = {
     borderTop: "1px solid var(--border)",
     background: "rgba(46,204,113,0.06)",
     display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) 140px auto auto",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr)) 120px auto auto",
     gap: "10px",
     alignItems: "end",
+  },
+  distributionHelp: {
+    gridColumn: "1 / -1",
+    color: "var(--text-secondary)",
+    fontSize: "0.8rem",
+    lineHeight: 1.5,
+  },
+  distributionToggle: {
+    gridColumn: "1 / -1",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    color: "var(--text-primary)",
+    fontSize: "0.86rem",
   },
   distributionField: {
     display: "flex",
@@ -374,8 +388,11 @@ const MyTasks = () => {
   const [filter, setFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState(null); // task id being acted on
   const [completionTaskId, setCompletionTaskId] = useState(null);
+  const [assignedCamps, setAssignedCamps] = useState([]);
   const [distributionForm, setDistributionForm] = useState({
-    items: "",
+    deliverItems: false,
+    campId: "",
+    inventoryItemId: "",
     quantity: 1,
   });
 
@@ -388,8 +405,16 @@ const MyTasks = () => {
       .finally(() => setLoading(false));
   };
 
+  const fetchAssignedCamps = () => {
+    api
+      .get("/camps/my-assigned")
+      .then((res) => setAssignedCamps(res.data.data || []))
+      .catch(console.error);
+  };
+
   useEffect(() => {
     fetchTasks();
+    fetchAssignedCamps();
   }, []);
 
   const handleRespond = async (taskId, action) => {
@@ -425,17 +450,34 @@ const MyTasks = () => {
     setActionLoading(taskId);
 
     try {
-      await api.post("/distribution", {
-        taskId,
-        items: distributionForm.items,
-        quantity: Number(distributionForm.quantity),
-      });
+      if (distributionForm.deliverItems) {
+        if (!distributionForm.campId || !distributionForm.inventoryItemId) {
+          alert("Select your assigned camp and an available camp item first.");
+          setActionLoading(null);
+          return;
+        }
+
+        await api.post("/distribution", {
+          taskId,
+          campId: distributionForm.campId,
+          inventoryItemId: distributionForm.inventoryItemId,
+          quantity: Number(distributionForm.quantity),
+        });
+      } else {
+        await api.put(`/tasks/${taskId}/status`, { status: "completed" });
+      }
 
       setCompletionTaskId(null);
-      setDistributionForm({ items: "", quantity: 1 });
+      setDistributionForm({
+        deliverItems: false,
+        campId: "",
+        inventoryItemId: "",
+        quantity: 1,
+      });
       fetchTasks();
+      fetchAssignedCamps();
     } catch (err) {
-      alert(err.response?.data?.message || "Distribution submission failed.");
+      alert(err.response?.data?.message || "Task completion failed.");
     } finally {
       setActionLoading(null);
     }
@@ -539,6 +581,12 @@ const MyTasks = () => {
             const victim = sos?.victim;
             const busy = isActing(task._id);
             const nextStatuses = NEXT_STATUS[task.status] || [];
+            const selectedCamp = assignedCamps.find(
+              (camp) => camp._id === distributionForm.campId,
+            );
+            const selectedInventory = selectedCamp?.inventory?.find(
+              (item) => item._id === distributionForm.inventoryItemId,
+            );
 
             return (
               <div
@@ -683,45 +731,115 @@ const MyTasks = () => {
                 {/* Action footer — only for actionable statuses */}
                 {completionTaskId === task._id && task.status === "on_the_way" && (
                   <div style={styles.distributionForm}>
-                    <div style={styles.distributionField}>
-                      <label style={styles.distributionLabel}>Items</label>
-                      <input
-                        type="text"
-                        style={styles.distributionInput}
-                        placeholder="Rice, water, medicine"
-                        value={distributionForm.items}
-                        onChange={(event) =>
-                          setDistributionForm((current) => ({
-                            ...current,
-                            items: event.target.value,
-                          }))
-                        }
-                      />
+                    <div style={styles.distributionHelp}>
+                      Complete this rescue now. Delivering inventory is optional
+                      and only works through a camp assigned to you.
                     </div>
 
-                    <div style={styles.distributionField}>
-                      <label style={styles.distributionLabel}>Quantity</label>
+                    <label style={styles.distributionToggle}>
                       <input
-                        type="number"
-                        min="1"
-                        style={styles.distributionInput}
-                        value={distributionForm.quantity}
+                        type="checkbox"
+                        checked={distributionForm.deliverItems}
                         onChange={(event) =>
                           setDistributionForm((current) => ({
                             ...current,
-                            quantity: event.target.value,
+                            deliverItems: event.target.checked,
+                            campId: event.target.checked ? current.campId : "",
+                            inventoryItemId: event.target.checked
+                              ? current.inventoryItemId
+                              : "",
                           }))
                         }
                       />
-                    </div>
+                      Deliver item from camp inventory
+                    </label>
+
+                    {distributionForm.deliverItems && (
+                      <>
+                        {assignedCamps.length === 0 && (
+                          <div style={styles.distributionHelp}>
+                            No active camp is assigned to you yet. Ask an NGO to
+                            assign you to a camp before delivering inventory, or
+                            complete the rescue without items.
+                          </div>
+                        )}
+
+                        <div style={styles.distributionField}>
+                          <label style={styles.distributionLabel}>Camp</label>
+                          <select
+                            style={styles.distributionInput}
+                            value={distributionForm.campId}
+                            onChange={(event) =>
+                              setDistributionForm((current) => ({
+                                ...current,
+                                campId: event.target.value,
+                                inventoryItemId: "",
+                              }))
+                            }
+                          >
+                            <option value="">Select assigned camp</option>
+                            {assignedCamps.map((camp) => (
+                              <option key={camp._id} value={camp._id}>
+                                {camp.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div style={styles.distributionField}>
+                          <label style={styles.distributionLabel}>Item</label>
+                          <select
+                            style={styles.distributionInput}
+                            value={distributionForm.inventoryItemId}
+                            disabled={!selectedCamp}
+                            onChange={(event) =>
+                              setDistributionForm((current) => ({
+                                ...current,
+                                inventoryItemId: event.target.value,
+                              }))
+                            }
+                          >
+                            <option value="">Select camp item</option>
+                            {(selectedCamp?.inventory || []).map((item) => (
+                              <option key={item._id} value={item._id}>
+                                {item.itemName} - {item.quantity}{" "}
+                                {item.unit || "units"} available
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div style={styles.distributionField}>
+                          <label style={styles.distributionLabel}>Quantity</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max={selectedInventory?.quantity || undefined}
+                            style={styles.distributionInput}
+                            value={distributionForm.quantity}
+                            onChange={(event) =>
+                              setDistributionForm((current) => ({
+                                ...current,
+                                quantity: event.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                      </>
+                    )}
 
                     <button
                       type="button"
                       style={styles.distributionSubmit}
-                      disabled={busy}
+                      disabled={
+                        busy ||
+                        (distributionForm.deliverItems &&
+                          (!distributionForm.campId ||
+                            !distributionForm.inventoryItemId))
+                      }
                       onClick={() => handleDistributionSubmit(task._id)}
                     >
-                      {busy ? "Saving..." : "Submit"}
+                      {busy ? "Saving..." : "Complete Rescue"}
                     </button>
 
                     <button
@@ -729,7 +847,12 @@ const MyTasks = () => {
                       style={styles.distributionCancel}
                       onClick={() => {
                         setCompletionTaskId(null);
-                        setDistributionForm({ items: "", quantity: 1 });
+                        setDistributionForm({
+                          deliverItems: false,
+                          campId: "",
+                          inventoryItemId: "",
+                          quantity: 1,
+                        });
                       }}
                     >
                       Cancel
