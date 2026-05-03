@@ -2,18 +2,20 @@ const Distribution = require('../models/Distribution');
 const Task = require('../models/Task');
 const SOSRequest = require('../models/SOSRequest');
 const User = require('../models/User');
+const Camp = require('../models/Camp');
+const Inventory = require('../models/Inventory');
 
 // @desc    Log a distribution record
 // @route   POST /api/distribution
 // @access  Private (volunteer)
 const createDistribution = async (req, res) => {
   try {
-    const { taskId, victimId, items, quantity, campId, notes, date } = req.body;
+    const { taskId, victimId, inventoryItemId, quantity, campId, notes, date } = req.body;
 
-    if (!taskId || !items || !quantity) {
+    if (!taskId || !campId || !inventoryItemId || !quantity) {
       return res.status(400).json({
         success: false,
-        message: 'taskId, items, and quantity are required',
+        message: 'taskId, campId, inventoryItemId, and quantity are required when delivering items',
       });
     }
 
@@ -44,6 +46,18 @@ const createDistribution = async (req, res) => {
       });
     }
 
+    const camp = await Camp.findOne({
+      _id: campId,
+      assignedVolunteers: req.user._id,
+      isActive: true,
+    });
+    if (!camp) {
+      return res.status(403).json({
+        success: false,
+        message: 'Volunteer must be assigned to the selected active camp before distributing items',
+      });
+    }
+
     const sosRequest = task.sosRequest;
     if (!sosRequest) {
       return res.status(400).json({ success: false, message: 'Linked SOS request not found' });
@@ -61,18 +75,42 @@ const createDistribution = async (req, res) => {
       });
     }
 
+    const inventoryItem = await Inventory.findOne({
+      _id: inventoryItemId,
+      camp: camp._id,
+    });
+    if (!inventoryItem) {
+      return res.status(404).json({
+        success: false,
+        message: 'Selected item was not found in this camp inventory',
+      });
+    }
+
+    if (inventoryItem.quantity < parsedQuantity) {
+      return res.status(400).json({
+        success: false,
+        message: `Not enough ${inventoryItem.itemName} in ${camp.name}. Available: ${inventoryItem.quantity} ${inventoryItem.unit || 'units'}`,
+      });
+    }
+
     const distributionDate = date ? new Date(date) : new Date();
+    inventoryItem.quantity -= parsedQuantity;
+    inventoryItem.isLow = inventoryItem.quantity <= inventoryItem.lowStockThreshold;
+    await inventoryItem.save();
+
     const record = await Distribution.create({
-      ngo: null,
+      ngo: camp.ngo,
       volunteerId: req.user._id,
       victimId: resolvedVictimId,
-      camp: campId || null,
+      camp: camp._id,
       recipient: victim?.name || 'Victim',
       recipientUser: resolvedVictimId || null,
       items: [
         {
-          itemName: String(items).trim(),
+          inventoryItem: inventoryItem._id,
+          itemName: inventoryItem.itemName,
           quantity: parsedQuantity,
+          unit: inventoryItem.unit,
         },
       ],
       quantity: parsedQuantity,
@@ -96,16 +134,16 @@ const createDistribution = async (req, res) => {
   }
 };
 
-// @desc    Get all distribution records for admin monitoring
+// @desc    Get all distribution records for admin/NGO monitoring
 // @route   GET /api/distribution
-// @access  Private (admin)
+// @access  Private (admin, ngo)
 const getDistributions = async (req, res) => {
   try {
     const records = await Distribution.find({})
-      .populate('camp', 'name')
-      .populate('volunteerId', 'name')
-      .populate('victimId', 'name')
-      .populate('recipientUser', 'name')
+      .populate('camp', 'name address')
+      .populate('volunteerId', 'name phone')
+      .populate('victimId', 'name phone')
+      .populate('recipientUser', 'name phone')
       .sort({ distributedAt: -1 });
     res.json({ success: true, data: records });
   } catch (error) {

@@ -40,16 +40,58 @@ const getNearbyCamps = async (req, res) => {
   }
 };
 
-// @desc    Get all camps for NGO
+// @desc    Get camps for NGO/admin dashboards and management screens
 // @route   GET /api/camps
 // @access  Private (ngo, admin)
 const getCamps = async (req, res) => {
   try {
-    const filter = req.user.role === "admin" ? {} : { ngo: req.user._id };
+    const canViewAll = req.user.role === "admin" || req.query.scope === "all";
+    const filter = canViewAll ? {} : { ngo: req.user._id };
     const camps = await Camp.find(filter)
+      .populate("ngo", "name")
       .populate("assignedVolunteers", "name phone")
       .sort({ isActive: -1, updatedAt: -1 });
     res.json({ success: true, data: camps });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get camps assigned to the logged-in volunteer with available inventory
+// @route   GET /api/camps/my-assigned
+// @access  Private (volunteer)
+const getMyAssignedCamps = async (req, res) => {
+  try {
+    const camps = await Camp.find({
+      assignedVolunteers: req.user._id,
+      isActive: true,
+    })
+      .select("name address capacity currentOccupancy isActive assignedVolunteers")
+      .sort({ updatedAt: -1 })
+      .lean();
+
+    const campIds = camps.map((camp) => camp._id);
+    const inventoryItems = await Inventory.find({
+      camp: { $in: campIds },
+      quantity: { $gt: 0 },
+    })
+      .select("camp itemName category quantity unit lowStockThreshold isLow")
+      .sort({ itemName: 1 })
+      .lean();
+
+    const inventoryByCamp = inventoryItems.reduce((acc, item) => {
+      const campId = item.camp?.toString();
+      if (!acc[campId]) acc[campId] = [];
+      acc[campId].push(item);
+      return acc;
+    }, {});
+
+    const data = camps.map((camp) => ({
+      ...camp,
+      inventory: inventoryByCamp[camp._id.toString()] || [],
+    }));
+
+    res.json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -183,6 +225,7 @@ const unassignVolunteer = async (req, res) => {
 
 module.exports = {
   getCamps,
+  getMyAssignedCamps,
   createCamp,
   updateCamp,
   deleteCamp,

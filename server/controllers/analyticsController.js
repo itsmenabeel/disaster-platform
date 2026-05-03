@@ -2,6 +2,7 @@ const SOSRequest = require('../models/SOSRequest');
 const Task = require('../models/Task');
 const User = require('../models/User');
 const Distribution = require('../models/Distribution');
+const Camp = require('../models/Camp');
 
 // @desc    Get all analytics data for admin dashboard
 // @route   GET /api/analytics
@@ -115,4 +116,29 @@ const getReports = async (req, res) => {
   }
 };
 
-module.exports = { getDashboardAnalytics, getReports };
+const getLiveMapData = async (req, res) => {
+  try {
+    const canViewAll = ['admin', 'ngo'].includes(req.user.role);
+    const sosFilter = canViewAll ? {} : { victim: req.user._id };
+
+    const [requests, camps] = await Promise.all([
+      SOSRequest.find(sosFilter)
+        .select('victim needs location address priority status assignedVolunteer createdAt updatedAt')
+        .populate('victim', 'name phone')
+        .populate('assignedVolunteer', 'name phone')
+        .sort({ updatedAt: -1 })
+        .lean(),
+      Camp.find({})
+        .select('ngo name location address capacity currentOccupancy isActive assignedVolunteers updatedAt')
+        .populate('ngo', 'name')
+        .sort({ isActive: -1, updatedAt: -1 })
+        .lean(),
+    ]);
+
+    res.json({ success: true, data: { requests, camps } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getDashboardAnalytics, getReports, getLiveMapData };
