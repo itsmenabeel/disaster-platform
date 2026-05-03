@@ -271,24 +271,6 @@ const VictimDashboard = () => {
           </div>
         </Link>
 
-        <Link to="/incidents" style={{ textDecoration: "none" }}>
-          <div
-            style={{
-              ...styles.requestCard,
-              marginBottom: "28px",
-              padding: "22px 24px",
-              borderColor: "rgba(243,156,18,0.28)",
-            }}
-          >
-            <div style={styles.requestLeft}>
-              <div style={styles.requestNeeds}>Incident History</div>
-              <div style={styles.requestDate}>
-                View reported incidents with location, date, and description.
-              </div>
-            </div>
-            <button style={styles.trackBtn(false)}>OPEN</button>
-          </div>
-        </Link>
 
         {/* Request History */}
         <div style={styles.sectionTitle}>
