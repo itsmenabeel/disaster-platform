@@ -422,6 +422,9 @@ const InventoryPage = () => {
               <Link to="/ngo/camps" style={styles.navLink(false)}>
                 Camps
               </Link>
+              <Link to="/ngo/distribution" style={styles.navLink(false)}>
+                Distribution
+              </Link>
             </div>
           </div>
         </div>

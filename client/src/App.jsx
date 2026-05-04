@@ -37,6 +37,8 @@ import IncidentsPage from "./pages/admin/IncidentsPage";
 import BroadcastPage from "./pages/admin/BroadcastPage";
 import ReportsPage from "./pages/admin/ReportsPage";
 import DistributionMonitorPage from "./pages/admin/DistributionMonitorPage";
+import PriorityRequestsPage from "./pages/admin/PriorityRequestsPage";
+import RecentIncidentsPage from "./pages/admin/RecentIncidentsPage";
 
 // Role-based protected route
 const ProtectedRoute = ({ children, roles }) => {
@@ -236,6 +238,22 @@ const App = () => (
           element={
             <ProtectedRoute roles={["admin"]}>
               <ReportsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/priority-requests"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <PriorityRequestsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/recent-incidents"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <RecentIncidentsPage />
             </ProtectedRoute>
           }
         />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -34,6 +34,24 @@ const styles = {
     color: "var(--text-secondary)",
     marginBottom: "24px",
   },
+  tabs: {
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginBottom: "24px",
+  },
+  tab: (active) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "10px 14px",
+    borderRadius: "var(--radius)",
+    border: `1px solid ${active ? "rgba(46,204,113,0.35)" : "var(--border)"}`,
+    background: active ? "rgba(46,204,113,0.12)" : "var(--bg-surface)",
+    color: active ? "var(--success)" : "var(--text-primary)",
+    textDecoration: "none",
+    fontWeight: 600,
+  }),
   stats: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
@@ -116,6 +134,18 @@ const ReportsPage = () => {
         <div style={styles.title}>Analytics</div>
         <div style={styles.text}>
           Four charts only: request status, request priority, resource distribution, and volunteer activity.
+        </div>
+
+        <div style={styles.tabs}>
+          <Link to="/admin/reports" style={styles.tab(true)}>
+            Analytics
+          </Link>
+          <Link to="/admin/priority-requests" style={styles.tab(false)}>
+            Priority Requests
+          </Link>
+          <Link to="/admin/recent-incidents" style={styles.tab(false)}>
+            Recent Incidents
+          </Link>
         </div>
 
         <div style={styles.stats}>
