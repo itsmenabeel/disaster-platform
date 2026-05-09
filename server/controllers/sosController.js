@@ -3,7 +3,7 @@ const Task = require("../models/Task");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
 
-// @desc    Create SOS request (auto-assigns nearest available volunteer)
+// @desc    Create SOS request
 // @route   POST /api/sos
 // @access  Private (victim)
 const createSOS = async (req, res) => {
@@ -32,6 +32,7 @@ const createSOS = async (req, res) => {
 		});
 
 		if (nearestVolunteer) {
+			console.log(`Assigning SOS request ${sosRequest._id} to volunteer ${nearestVolunteer._id}`);
 			await Task.create({
 				sosRequest: sosRequest._id,
 				volunteer: nearestVolunteer._id,

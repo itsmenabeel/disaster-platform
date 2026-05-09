@@ -4,7 +4,7 @@ import api from '../services/api';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // ✅ LOAD USER FROM LOCALSTORAGE (IMPORTANT FIX)
+  // LOAD USER FROM LOCALSTORAGE
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem('user')) || null
   );
@@ -21,12 +21,11 @@ export const AuthProvider = ({ children }) => {
         .then((res) => {
           setUser(res.data.user);
 
-          // ✅ ALSO STORE USER HERE (IMPORTANT)
           localStorage.setItem('user', JSON.stringify(res.data.user));
         })
         .catch(() => {
           localStorage.removeItem('token');
-          localStorage.removeItem('user'); // cleanup
+          localStorage.removeItem('user');
         })
         .finally(() => setLoading(false));
 
@@ -40,10 +39,8 @@ export const AuthProvider = ({ children }) => {
 
     const { token, user } = res.data;
 
-    // ✅ STORE TOKEN
     localStorage.setItem('token', token);
 
-    // ✅ STORE USER (THIS WAS YOUR MAIN MISSING PART)
     localStorage.setItem('user', JSON.stringify(user));
 
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -70,7 +67,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user'); // ✅ important
+    localStorage.removeItem('user');
     delete api.defaults.headers.common['Authorization'];
     setUser(null);
   };

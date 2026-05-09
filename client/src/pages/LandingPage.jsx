@@ -811,8 +811,8 @@ const LandingPage = () => {
                 num: "02",
                 icon: "⚡",
                 color: "#3498db",
-                title: "AUTO-DISPATCH",
-                desc: "The system instantly finds the nearest available volunteer within a 50 km radius using geospatial matching.",
+                title: "VOLUNTEER DISPATCH",
+                desc: "The system notifies the nearest available volunteers within a 50 km radius using geospatial matching.",
               },
               {
                 num: "03",

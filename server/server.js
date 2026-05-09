@@ -8,15 +8,15 @@ connectDB();
 
 const app = express();
 
-/* ✅ FIXED CORS (NO BUGS, NO SLASH ISSUES) */
+/* FIXED CORS (NO BUGS, NO SLASH ISSUES) */
 app.use(
   cors({
-    origin: "http://localhost:5173", // 🔥 hardcoded → safest for now
+    origin: "http://localhost:5173",
     credentials: true,
   }),
 );
 
-/* ✅ EXTRA SAFETY (handles preflight requests) */
+/* EXTRA SAFETY (handles preflight requests) */
 app.options("*", cors());
 
 /* Middleware */
