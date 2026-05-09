@@ -455,49 +455,43 @@ const styles = {
   },
 };
 
-/* ─── Component ──────────────────────────────────────────────────── */
+
 const EditSOS = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  /* ── Initial load ── */
   const [loadingData, setLoadingData] = useState(true);
   const [loadError, setLoadError]     = useState("");
 
-  /* ── Form fields ── */
   const [needs, setNeeds]             = useState([]);
   const [description, setDescription] = useState("");
   const [address, setAddress]         = useState("");
   const [coordinates, setCoordinates] = useState(null);
   const [gpsStatus, setGpsStatus]     = useState("idle");
 
-  /* ── Media ── */
   // Each entry: { dataUri, originalIndex }
   const [existingMedia, setExistingMedia]   = useState([]);
   const [removedIndices, setRemovedIndices] = useState(new Set());
   const [newFiles, setNewFiles]             = useState([]);
   const [newPreviews, setNewPreviews]       = useState([]);
 
-  /* ── Save state ── */
   const [saving, setSaving]   = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  /* ── Resolve modal ── */
   const [showModal, setShowModal]       = useState(false);
   const [selectedReason, setSelectedReason] = useState("");
   const [customReason, setCustomReason] = useState("");
   const [resolving, setResolving]       = useState(false);
   const [resolveError, setResolveError] = useState("");
 
-  /* ── Fetch existing SOS on mount ── */
   const fetchSOS = useCallback(async () => {
     try {
       const res = await api.get(`/sos/${id}`);
       const sos = res.data.data;
 
-      // Ownership guard — the server enforces this too, but fast-fail on client
+      // Ownership guard
       const victimId =
         typeof sos.victim === "object" ? sos.victim._id : sos.victim;
       if (victimId !== user._id) {
@@ -513,7 +507,6 @@ const EditSOS = () => {
         return;
       }
 
-      // Pre-populate fields
       setNeeds(sos.needs || []);
       setDescription(sos.description || "");
       setAddress(sos.address || "");
@@ -522,7 +515,6 @@ const EditSOS = () => {
         setGpsStatus("success");
       }
 
-      // Map existing media to { dataUri, originalIndex }
       setExistingMedia(
         (sos.media || []).map((uri, idx) => ({ dataUri: uri, originalIndex: idx })),
       );
@@ -537,7 +529,6 @@ const EditSOS = () => {
     fetchSOS();
   }, [fetchSOS]);
 
-  /* ── GPS helpers ── */
   const fetchLocation = () => {
     if (!navigator.geolocation) {
       setGpsStatus("error");
@@ -566,13 +557,12 @@ const EditSOS = () => {
     error: { title: "Location unavailable", coords: "GPS access denied or unavailable" },
   };
 
-  /* ── Need toggling ── */
   const toggleNeed = (value) =>
     setNeeds((prev) =>
       prev.includes(value) ? prev.filter((n) => n !== value) : [...prev, value],
     );
 
-  /* ── Existing media removal toggle ── */
+
   const toggleRemoveExisting = (originalIndex) => {
     setRemovedIndices((prev) => {
       const next = new Set(prev);
@@ -581,7 +571,6 @@ const EditSOS = () => {
     });
   };
 
-  /* ── New file handling ── */
   const totalMediaCount =
     existingMedia.length - removedIndices.size + newFiles.length;
 
@@ -646,7 +635,6 @@ const EditSOS = () => {
       }
 
       setSaveSuccess(true);
-      // Brief success flash, then navigate back to track page
       setTimeout(() => navigate(`/victim/track/${id}`), 1200);
     } catch (err) {
       setSaveError(
@@ -657,7 +645,6 @@ const EditSOS = () => {
     }
   };
 
-  /* ── Resolve helpers ── */
   const openModal = () => {
     setSelectedReason("");
     setCustomReason("");
@@ -696,9 +683,7 @@ const EditSOS = () => {
     }
   };
 
-  /* ────────────────── RENDER ────────────────── */
 
-  /* Loading state */
   if (loadingData) {
     return (
       <div style={styles.page}>
@@ -710,7 +695,6 @@ const EditSOS = () => {
     );
   }
 
-  /* Error / unauthorized state */
   if (loadError) {
     return (
       <div style={styles.page}>

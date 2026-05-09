@@ -19,29 +19,6 @@ const createSOS = async (req, res) => {
 			address,
 		});
 
-		// Smart task allocation: find nearest available volunteer using $near
-		const nearestVolunteer = await User.findOne({
-			role: "volunteer",
-			isAvailable: true,
-			location: {
-				$near: {
-					$geometry: { type: "Point", coordinates },
-					$maxDistance: 50000, // 50km radius
-				},
-			},
-		});
-
-		if (nearestVolunteer) {
-			console.log(`Assigning SOS request ${sosRequest._id} to volunteer ${nearestVolunteer._id}`);
-			await Task.create({
-				sosRequest: sosRequest._id,
-				volunteer: nearestVolunteer._id,
-			});
-			sosRequest.assignedVolunteer = nearestVolunteer._id;
-			sosRequest.status = "assigned";
-			await sosRequest.save();
-		}
-
 		res.status(201).json({ success: true, data: sosRequest });
 	} catch (error) {
 		res.status(500).json({ success: false, message: error.message });
@@ -352,7 +329,6 @@ const updateSOS = async (req, res) => {
 			});
 		}
 
-		// --- Apply field updates ---
 		if (Array.isArray(needs) && needs.length > 0) sosRequest.needs = needs;
 		if (description !== undefined) sosRequest.description = description;
 		if (address !== undefined) sosRequest.address = address;
@@ -372,35 +348,6 @@ const updateSOS = async (req, res) => {
 		}
 
 		await sosRequest.save();
-
-		// If coordinates changed and the request is still pending, try to
-		// auto-assign the nearest available volunteer at the new location.
-		if (
-			Array.isArray(coordinates) &&
-			coordinates.length === 2 &&
-			sosRequest.status === "pending"
-		) {
-			const nearestVolunteer = await User.findOne({
-				role: "volunteer",
-				isAvailable: true,
-				location: {
-					$near: {
-						$geometry: { type: "Point", coordinates },
-						$maxDistance: 50000,
-					},
-				},
-			});
-
-			if (nearestVolunteer) {
-				await Task.create({
-					sosRequest: sosRequest._id,
-					volunteer: nearestVolunteer._id,
-				});
-				sosRequest.assignedVolunteer = nearestVolunteer._id;
-				sosRequest.status = "assigned";
-				await sosRequest.save();
-			}
-		}
 
 		// If a volunteer is already assigned, notify them of the changes
 		// so they can review the updated details before heading out.

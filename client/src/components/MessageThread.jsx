@@ -158,7 +158,6 @@ const styles = {
   },
 };
 
-/* ─── Component ──────────────────────────────────────────────────── */
 const MessageThread = ({ sosId, isActive }) => {
   const { user } = useAuth();
   const { messages, loading, error, sending, sendMessage } = useMessages(
@@ -173,35 +172,34 @@ const MessageThread = ({ sosId, isActive }) => {
   const inputRef = useRef(null);
   const prevMessageCountRef = useRef(0);
   // Tracks whether the very first fetch has completed yet.
-  // The initial load should never be treated as "unread" — the user just
+  // The initial load should never be treated as "unread", the user just
   // opened the page and is actively looking at it.
   const isInitialLoadRef = useRef(true);
 
-  // ── Scroll & unread tracking ────────────────────────────────────
+  // Scroll & unread tracking
   useEffect(() => {
     const isNewMessages = messages.length > prevMessageCountRef.current;
 
     if (isNewMessages && listRef.current) {
       if (isInitialLoadRef.current) {
-        // First batch of messages — scroll into view and mark immediately read.
+        // First batch of messages
         listRef.current.scrollTop = listRef.current.scrollHeight;
         localStorage.setItem(`chatRead_${sosId}`, Date.now().toString());
         isInitialLoadRef.current = false;
       } else {
-        // Subsequent poll — only mark unread if the user has scrolled up.
+        // Subsequent poll
         if (isAtBottom(listRef.current)) {
-          // User is actively watching — scroll and keep marked as read.
+          // User is actively watching
           listRef.current.scrollTop = listRef.current.scrollHeight;
           localStorage.setItem(`chatRead_${sosId}`, Date.now().toString());
         } else {
-          // User has scrolled up to read older messages — flag as unread.
+          // User scrolled up to read older messages
           setHasUnread(true);
           localStorage.setItem(`chatLastMsg_${sosId}`, Date.now().toString());
         }
       }
     } else if (isInitialLoadRef.current) {
-      // Initial fetch returned zero messages — still mark the session as read
-      // so the dashboard doesn't show a stale unread indicator.
+      // Initial fetch returned zero messages
       isInitialLoadRef.current = false;
       localStorage.setItem(`chatRead_${sosId}`, Date.now().toString());
     }
@@ -209,7 +207,7 @@ const MessageThread = ({ sosId, isActive }) => {
     prevMessageCountRef.current = messages.length;
   }, [messages, sosId]);
 
-  // ── Clear unread when user scrolls back to the bottom ──────────
+  // Clear unread when user scrolls back to the bottom
   const handleListScroll = () => {
     if (!listRef.current || !hasUnread) return;
     if (isAtBottom(listRef.current)) {
@@ -218,7 +216,7 @@ const MessageThread = ({ sosId, isActive }) => {
     }
   };
 
-  // ── Send ────────────────────────────────────────────────────────
+  // Send
   const handleSend = async (e) => {
     e.preventDefault();
     const trimmed = draft.trim();
@@ -226,7 +224,7 @@ const MessageThread = ({ sosId, isActive }) => {
     try {
       await sendMessage(trimmed);
       setDraft("");
-      // Sending a message means the user is actively engaged — clear unread.
+      // User is actively engaged
       setHasUnread(false);
       localStorage.setItem(`chatRead_${sosId}`, Date.now().toString());
       inputRef.current?.focus();
