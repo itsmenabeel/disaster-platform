@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { AlertOctagon, UserCheck, Tent, Waves } from 'lucide-react';
 
 const styles = {
   page: {
@@ -176,9 +177,9 @@ const styles = {
 };
 
 const ROLES = [
-  { value: 'victim',    emoji: '🆘', name: 'Victim',    desc: 'Request rescue & aid' },
-  { value: 'volunteer', emoji: '🙋', name: 'Volunteer',  desc: 'Respond to requests' },
-  { value: 'ngo',       emoji: '🏕️', name: 'NGO',        desc: 'Manage resources' },
+  { value: 'victim',    emoji: <AlertOctagon size={18} />, name: 'Victim',    desc: 'Request rescue & aid' },
+  { value: 'volunteer', emoji: <UserCheck size={18} />,    name: 'Volunteer',  desc: 'Respond to requests' },
+  { value: 'ngo',       emoji: <Tent size={18} />,         name: 'NGO',        desc: 'Manage resources' },
 ];
 
 const Register = () => {
@@ -226,7 +227,7 @@ const Register = () => {
 
       <div style={styles.container}>
         <div style={styles.logoRow}>
-          <div style={styles.logoIcon}>🌊</div>
+          <div style={styles.logoIcon}><Waves size={18} /></div>
           <span style={styles.logoText}>DISASTER RESPONSE PLATFORM</span>
         </div>
 

@@ -5,15 +5,16 @@ import { useAuth } from "../../context/AuthContext";
 import NavTopBar from "../../components/NavTopBar";
 import HeaderTag from "../../components/HeaderTag";
 import MediaCard from "../../components/Mediacard";
+import { Utensils, Pill, Home, Droplets, Shirt, Package, Radio, XCircle, CheckCircle2, Map } from "lucide-react";
 
 /* ── Static config (same as NearbyMap) ── */
 const NEED_EMOJIS = {
-  food: "🍱",
-  medicine: "💊",
-  shelter: "🏠",
-  water: "💧",
-  clothing: "👕",
-  other: "📦",
+  food: <Utensils size={14} />,
+  medicine: <Pill size={14} />,
+  shelter: <Home size={14} />,
+  water: <Droplets size={14} />,
+  clothing: <Shirt size={14} />,
+  other: <Package size={14} />,
 };
 
 const PRIORITY = {
@@ -193,7 +194,7 @@ const SOSDetailPage = () => {
             fontSize: "0.88rem",
           }}
         >
-          <div style={{ fontSize: "2rem" }}>📡</div>
+          <div style={{ fontSize: "2rem" }}><Radio size={32} /></div>
           Loading SOS request…
         </div>
       )}
@@ -211,7 +212,7 @@ const SOSDetailPage = () => {
             padding: 32,
           }}
         >
-          <div style={{ fontSize: "2rem" }}>❌</div>
+          <div style={{ fontSize: "2rem" }}><XCircle size={32} /></div>
           <div
             style={{
               fontFamily: "IBM Plex Mono, monospace",
@@ -256,7 +257,7 @@ const SOSDetailPage = () => {
             gap: 16,
           }}
         >
-          <div style={{ fontSize: "3rem" }}>✅</div>
+          <div style={{ fontSize: "3rem" }}><CheckCircle2 size={48} /></div>
           <div
             style={{
               fontFamily: "Oswald, sans-serif",
@@ -380,7 +381,7 @@ const SOSDetailPage = () => {
                     color: "#eef0f4",
                   }}
                 >
-                  {NEED_EMOJIS[n] || "📦"} {n}
+                  {NEED_EMOJIS[n] || <Package size={14} />} {n}
                 </span>
               ))}
             </div>
@@ -444,7 +445,7 @@ const SOSDetailPage = () => {
                 letterSpacing: "0.04em",
               }}
             >
-              🗺 Open in Google Maps →
+              <Map size={12} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Open in Google Maps →
             </a>
           </div>
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import { Lock } from "lucide-react";
 
 const styles = {
   page: {
@@ -202,7 +203,7 @@ const ResetPassword = () => {
             </>
           ) : (
             <>
-              <div style={styles.icon}>🔒</div>
+              <div style={styles.icon}><Lock size={24} /></div>
               <div style={styles.title}>Set New Password</div>
               <div style={styles.desc}>
                 Choose a strong password for your account. It must be at least 6

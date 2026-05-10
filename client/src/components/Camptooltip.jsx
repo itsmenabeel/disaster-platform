@@ -1,5 +1,6 @@
 import React from "react";
 import "../css/NearbyMap.css";
+import { Circle } from "lucide-react";
 
 const Camptooltip = ({ camp, lat, lng }) => (
 	<div className="nm-sos-tooltip">
@@ -28,7 +29,10 @@ const Camptooltip = ({ camp, lat, lng }) => (
 			<span>{camp.currentOccupancy}</span>
 		</div>
 		<div className="nm-sos-tooltip__row">
-			{camp.isActive ? "🟢 Active Camp" : "⚫ Inactive Camp"} <br />
+			{camp.isActive
+			? <><Circle size={10} style={{ fill: "#2ecc71", color: "#2ecc71", display: "inline", verticalAlign: "middle" }} /> Active Camp</>
+			: <><Circle size={10} style={{ fill: "#4a5260", color: "#4a5260", display: "inline", verticalAlign: "middle" }} /> Inactive Camp</>
+		} <br />
 		</div>
 
 		{/* GPS */}

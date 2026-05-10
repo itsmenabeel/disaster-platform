@@ -1,14 +1,15 @@
 // src/components/SosTooltip.jsx
 import React from "react";
 import "../css/NearbyMap.css";
+import { Utensils, Pill, Home, Droplets, Shirt, Package, Clock } from "lucide-react";
 
 const NEED_EMOJIS = {
-  food: "🍱",
-  medicine: "💊",
-  shelter: "🏠",
-  water: "💧",
-  clothing: "👕",
-  other: "📦",
+  food: <Utensils size={12} />,
+  medicine: <Pill size={12} />,
+  shelter: <Home size={12} />,
+  water: <Droplets size={12} />,
+  clothing: <Shirt size={12} />,
+  other: <Package size={12} />,
 };
 
 const timeAgo = (d) => {
@@ -43,7 +44,7 @@ const SosTooltip = ({ req, priorityCfg, lat, lng }) => (
     <div className="nm-sos-tooltip__needs">
       {req.needs.map((n) => (
         <span key={n} className="nm-sos-tooltip__need-chip">
-          {NEED_EMOJIS[n] || "📦"} {n}
+          {NEED_EMOJIS[n] || <Package size={12} />} {n}
         </span>
       ))}
     </div>
@@ -86,7 +87,7 @@ const SosTooltip = ({ req, priorityCfg, lat, lng }) => (
 
     {/* Footer */}
     <div className="nm-sos-tooltip__footer">
-      🕐 Submitted {timeAgo(req.createdAt)}
+      <Clock size={12} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Submitted {timeAgo(req.createdAt)}
     </div>
     <div className="nm-sos-tooltip__hint">Click for full details →</div>
   </div>

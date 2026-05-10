@@ -12,6 +12,7 @@ import NavTopBar from "../../components/NavTopBar.jsx";
 import MessageThread from "../../components/MessageThread.jsx";
 
 import "../../css/TrackRescue.css";
+import { Clock, User, AlertCircle, CheckCircle2, Lock, Pencil } from "lucide-react";
 
 /* ─── Static config maps ─────────────────────────────────────────── */
 const PRIORITY_CONFIG = {
@@ -27,35 +28,35 @@ const STATUS_CONFIG = {
     bg: "rgba(243,156,18,0.1)",
     border: "rgba(243,156,18,0.3)",
     label: "Awaiting Volunteer",
-    icon: "⏳",
+    icon: <Clock size={28} />,
   },
   assigned: {
     color: "#3498db",
     bg: "rgba(52,152,219,0.1)",
     border: "rgba(52,152,219,0.3)",
     label: "Volunteer Assigned",
-    icon: "👤",
+    icon: <User size={28} />,
   },
   on_the_way: {
     color: "#9b59b6",
     bg: "rgba(155,89,182,0.1)",
     border: "rgba(155,89,182,0.3)",
     label: "Help On The Way",
-    icon: "🚨",
+    icon: <AlertCircle size={28} />,
   },
   rescued: {
     color: "#2ecc71",
     bg: "rgba(46,204,113,0.1)",
     border: "rgba(46,204,113,0.3)",
     label: "You Are Safe",
-    icon: "✅",
+    icon: <CheckCircle2 size={28} />,
   },
   closed: {
     color: "#8892a4",
     bg: "rgba(136,146,164,0.1)",
     border: "rgba(136,146,164,0.3)",
     label: "Request Closed",
-    icon: "🔒",
+    icon: <Lock size={28} />,
   },
 };
 
@@ -231,7 +232,7 @@ const TrackRescue = () => {
                   e.currentTarget.style.borderColor = "var(--border)";
                 }}
               >
-                ✏️ EDIT / RESOLVE REQUEST
+                <><Pencil size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> EDIT / RESOLVE REQUEST</>
               </button>
             </div>
           )}

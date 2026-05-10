@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { Waves } from "lucide-react";
 
 const styles = {
   page: {
@@ -241,7 +242,7 @@ const Login = () => {
         <div style={styles.panelGlow} />
 
         <div style={styles.logo}>
-          <div style={styles.logoIcon}>🌊</div>
+          <div style={styles.logoIcon}><Waves size={20} /></div>
           <div>
             <div style={styles.logoText}>DISASTER RESPONSE</div>
             <div style={styles.logoSub}>Relief Coordination Platform</div>

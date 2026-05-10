@@ -1,12 +1,13 @@
 // components/TrackRescue/TimelineCard.jsx
 import React from "react";
 import "../css/TrackRescue.css";
+import { AlertOctagon, User, Zap, CheckCircle2 } from "lucide-react";
 
 const TIMELINE_STEPS = [
-  { key: "pending", label: "SOS Sent", icon: "🆘" },
-  { key: "assigned", label: "Volunteer Assigned", icon: "👤" },
-  { key: "on_the_way", label: "Help On The Way", icon: "🚨" },
-  { key: "rescued", label: "Rescued", icon: "✅" },
+  { key: "pending", label: "SOS Sent", icon: <AlertOctagon size={16} /> },
+  { key: "assigned", label: "Volunteer Assigned", icon: <User size={16} /> },
+  { key: "on_the_way", label: "Help On The Way", icon: <Zap size={16} /> },
+  { key: "rescued", label: "Rescued", icon: <CheckCircle2 size={16} /> },
 ];
 
 const STEP_INDEX = {

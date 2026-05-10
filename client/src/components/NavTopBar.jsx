@@ -3,6 +3,7 @@ import "../css/TrackRescue.css";
 import "../css/ProfilePage.css";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
+import { Waves } from "lucide-react";
 
 const NavTopBar = ({ onBack, user, subtitle }) => {
   const location = useLocation();
@@ -12,7 +13,7 @@ const NavTopBar = ({ onBack, user, subtitle }) => {
   return (
     <div className="tr-top-bar">
       <div className="tr-top-bar__left">
-        <div className="tr-top-bar__icon">🌊</div>
+        <div className="tr-top-bar__icon"><Waves size={18} /></div>
         <div>
           <div className="tr-top-bar__title">DISASTER RESPONSE PLATFORM</div>
           <div className="profile-topbar__sub">

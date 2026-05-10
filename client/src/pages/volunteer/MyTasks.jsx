@@ -6,6 +6,7 @@ import NavTopBar from "../../components/NavTopBar";
 import MessageThread from "../../components/MessageThread.jsx";
 import PriorityBadge from "../../components/PriorityBadge";
 import { sortByPriorityDesc } from "../../utils/priority";
+import { Car, MailOpen, Map, User, Phone, MapPin, AlertCircle, CheckCircle2, Flag, AlertTriangle } from "lucide-react";
 
 /* ─── Status config ─── */
 const STATUS_META = {
@@ -39,7 +40,7 @@ const STATUS_META = {
 
 /* ─── Which next statuses are allowed from each current status ─── */
 const NEXT_STATUS = {
-  accepted: [{ value: "on_the_way", label: "🚗 Mark On the Way" }],
+  accepted: [{ value: "on_the_way", label: <><Car size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Mark On the Way</> }],
   on_the_way: [{ value: "completed", label: "✓ Mark Completed" }],
 };
 
@@ -555,7 +556,7 @@ const MyTasks = () => {
           </div>
         ) : filtered.length === 0 ? (
           <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>📭</div>
+            <div style={styles.emptyIcon}><MailOpen size={32} /></div>
             <div style={styles.emptyText}>
               {filter === "all"
                 ? "No tasks assigned yet. Browse the map to find nearby SOS requests."
@@ -571,7 +572,7 @@ const MyTasks = () => {
                   padding: "10px 24px",
                 }}
               >
-                🗺️ VIEW MAP
+                <Map size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> VIEW MAP
               </Link>
             )}
           </div>
@@ -623,25 +624,25 @@ const MyTasks = () => {
                     <div style={styles.infoRow}>
                       {victim?.name && (
                         <div style={styles.infoItem}>
-                          <span>👤</span>
+                          <span><User size={14} /></span>
                           <span>{victim.name}</span>
                         </div>
                       )}
                       {victim?.phone && (
                         <div style={styles.infoItem}>
-                          <span>📞</span>
+                          <span><Phone size={14} /></span>
                           <span>{victim.phone}</span>
                         </div>
                       )}
                       {sos?.address && (
                         <div style={styles.infoItem}>
-                          <span>📍</span>
+                          <span><MapPin size={14} /></span>
                           <span>{sos.address}</span>
                         </div>
                       )}
                       {sos?.priority && (
                         <div style={styles.infoItem}>
-                          <span>🚨</span>
+                          <span><AlertCircle size={14} /></span>
                           <span
                             style={{
                               color:
@@ -662,7 +663,7 @@ const MyTasks = () => {
                       )}
                       {task.acceptedAt && (
                         <div style={styles.infoItem}>
-                          <span>✅</span>
+                          <span><CheckCircle2 size={14} /></span>
                           <span>
                             Accepted{" "}
                             {new Date(task.acceptedAt).toLocaleTimeString()}
@@ -671,7 +672,7 @@ const MyTasks = () => {
                       )}
                       {task.completedAt && (
                         <div style={styles.infoItem}>
-                          <span>🏁</span>
+                          <span><Flag size={14} /></span>
                           <span>
                             Completed{" "}
                             {new Date(task.completedAt).toLocaleTimeString()}
@@ -713,7 +714,7 @@ const MyTasks = () => {
                 {/* Cancelled strip — shown when victim resolved the SOS before completion */}
                 {task.status === "cancelled" && task.notes && (
                   <div style={styles.cancelledStrip}>
-                    <span style={styles.cancelledIcon}>⚠️</span>
+                    <span style={styles.cancelledIcon}><AlertTriangle size={16} /></span>
                     <div style={styles.cancelledReason}>
                       <div style={styles.cancelledLabel}>
                         SOS resolved by victim — reason

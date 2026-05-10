@@ -1,14 +1,15 @@
 // components/TrackRescue/RequestDetailsCard.jsx
 import React from "react";
 import "../css/TrackRescue.css";
+import { Utensils, Pill, Home, Droplets, Shirt, Package } from "lucide-react";
 
 const NEED_EMOJIS = {
-  food: "🍱",
-  medicine: "💊",
-  shelter: "🏠",
-  water: "💧",
-  clothing: "👕",
-  other: "📦",
+  food: <Utensils size={14} />,
+  medicine: <Pill size={14} />,
+  shelter: <Home size={14} />,
+  water: <Droplets size={14} />,
+  clothing: <Shirt size={14} />,
+  other: <Package size={14} />,
 };
 
 const fmt = (dateStr) =>
@@ -30,7 +31,7 @@ const RequestDetailsCard = ({ sos }) => (
     <div className="tr-needs-row">
       {sos.needs.map((n) => (
         <div key={n} className="tr-need-chip">
-          <span>{NEED_EMOJIS[n] || "📦"}</span>
+          <span>{NEED_EMOJIS[n] || <Package size={14} />}</span>
           <span>{n}</span>
         </div>
       ))}
