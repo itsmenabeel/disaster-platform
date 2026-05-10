@@ -41,10 +41,8 @@ router.put(
 router.put("/:id/rate", protect, authorize("victim"), rateVolunteer);
 router.put("/:id/priority", protect, authorize("admin"), setPriority);
 
-// Victim-only: edit SOS fields
 router.put("/:id", protect, authorize("victim"), updateSOS);
 
-// Victim-only: self-resolve (close) their SOS request
 router.delete("/:id", protect, authorize("victim"), resolveSOS);
 
 router.route("/:id").get(protect, getSOSById);

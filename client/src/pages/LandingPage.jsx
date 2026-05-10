@@ -1,171 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
-/* ── Keyframes injected once ── */
-const injectStyles = () => {
-  if (document.getElementById("lp-keyframes")) return;
-  const el = document.createElement("style");
-  el.id = "lp-keyframes";
-  el.textContent = `
-    @keyframes scanline {
-      0%   { transform: translateY(-100%); opacity: 0; }
-      10%  { opacity: 1; }
-      90%  { opacity: 1; }
-      100% { transform: translateY(100vh); opacity: 0; }
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; } 50% { opacity: 0; }
-    }
-    @keyframes countUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes borderPulse {
-      0%, 100% { border-color: rgba(230,57,70,0.3); }
-      50%       { border-color: rgba(230,57,70,0.8); }
-    }
-    @keyframes rotateSlow {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
-    .lp-nav-link {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      color: #8892a4;
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: color 0.18s ease;
-    }
-    .lp-nav-link:hover { color: #eef0f4; }
-    .lp-feature-card {
-      background: #111318;
-      border: 1px solid #2a2f3a;
-      border-radius: 10px;
-      padding: 28px 24px;
-      transition: border-color 0.2s ease, transform 0.2s ease;
-      cursor: default;
-    }
-    .lp-feature-card:hover {
-      border-color: rgba(230,57,70,0.5);
-      transform: translateY(-3px);
-    }
-    .lp-role-card {
-      background: #111318;
-      border: 1px solid #2a2f3a;
-      border-radius: 10px;
-      padding: 24px;
-      transition: all 0.2s ease;
-    }
-    .lp-role-card:hover {
-      border-color: rgba(230,57,70,0.4);
-      background: #14171e;
-    }
-    .lp-cta-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: #e63946;
-      color: #fff;
-      padding: 14px 32px;
-      border-radius: 6px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-decoration: none;
-      transition: all 0.18s ease;
-      border: none;
-      cursor: pointer;
-    }
-    .lp-cta-btn:hover {
-      background: #ff4757;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(230,57,70,0.4);
-      color: #fff;
-    }
-    .lp-cta-ghost {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: transparent;
-      color: #eef0f4;
-      padding: 14px 32px;
-      border-radius: 6px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-decoration: none;
-      border: 1px solid #2a2f3a;
-      transition: all 0.18s ease;
-    }
-    .lp-cta-ghost:hover {
-      border-color: #eef0f4;
-      background: rgba(255,255,255,0.05);
-      color: #eef0f4;
-    }
-    .lp-stat-card {
-      border-right: 1px solid #2a2f3a;
-      padding: 0 40px;
-      animation: countUp 0.5s ease both;
-    }
-    .lp-stat-card:last-child { border-right: none; }
-    @media (max-width: 768px) {
-      .lp-stat-card { border-right: none; border-bottom: 1px solid #2a2f3a; padding: 20px 0; }
-      .lp-stat-card:last-child { border-bottom: none; }
-    }
-    .lp-cta-card-victim {
-      background: linear-gradient(135deg, #111318 60%, rgba(230,57,70,0.07) 100%);
-      border: 1px solid rgba(230,57,70,0.25);
-      border-radius: 12px;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      transition: all 0.2s ease;
-    }
-    .lp-cta-card-victim:hover {
-      border-color: rgba(230,57,70,0.55);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 48px rgba(230,57,70,0.12);
-    }
-    .lp-cta-card-responder {
-      background: linear-gradient(135deg, #111318 60%, rgba(46,204,113,0.06) 100%);
-      border: 1px solid rgba(46,204,113,0.2);
-      border-radius: 12px;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      transition: all 0.2s ease;
-    }
-    .lp-cta-card-responder:hover {
-      border-color: rgba(46,204,113,0.45);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 48px rgba(46,204,113,0.08);
-    }
-    .lp-testimonial-card {
-      background: #111318;
-      border: 1px solid #2a2f3a;
-      border-radius: 12px;
-      padding: 30px;
-      display: flex;
-      flex-direction: column;
-      transition: border-color 0.2s ease, transform 0.2s ease;
-    }
-    .lp-testimonial-card:hover {
-      border-color: rgba(255,255,255,0.1);
-      transform: translateY(-3px);
-    }
-
-
-  `;
-  document.head.appendChild(el);
-};
+import "../css/LandingPage.css";
 
 const FEATURES = [
   {
@@ -268,6 +104,106 @@ const STATS = [
   { value: "24", label: "Hour Coverage", suffix: "/7" },
 ];
 
+const SectionHeader = ({ eyebrow, title, highlight, children, compact = false }) => (
+  <div style={{ textAlign: "center", marginBottom: compact ? "56px" : "60px" }}>
+    <div
+      style={{
+        display: "inline-block",
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: "0.7rem",
+        color: "#e63946",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        marginBottom: "14px",
+        padding: "4px 14px",
+        background: "rgba(230,57,70,0.1)",
+        border: "1px solid rgba(230,57,70,0.25)",
+        borderRadius: 4,
+      }}
+    >
+      {eyebrow}
+    </div>
+    <h2
+      style={{
+        fontFamily: "Oswald, sans-serif",
+        fontSize: "clamp(2rem, 4vw, 3rem)",
+        fontWeight: 700,
+        marginBottom: children ? "14px" : 0,
+      }}
+    >
+      {title} {highlight && <span style={{ color: "#e63946" }}>{highlight}</span>}
+    </h2>
+    {children && (
+      <p
+        style={{
+          color: "#8892a4",
+          maxWidth: "500px",
+          margin: "0 auto",
+          lineHeight: 1.7,
+          fontSize: "0.95rem",
+        }}
+      >
+        {children}
+      </p>
+    )}
+  </div>
+);
+
+const FeatureCard = ({ feature }) => (
+  <div className="lp-feature-card">
+    <div style={{ fontSize: "1.8rem", marginBottom: "14px" }}>
+      {feature.icon}
+    </div>
+    <div
+      style={{
+        fontFamily: "Oswald, sans-serif",
+        fontSize: "1.05rem",
+        fontWeight: 600,
+        letterSpacing: "0.03em",
+        marginBottom: "8px",
+        color: "#eef0f4",
+      }}
+    >
+      {feature.title}
+    </div>
+    <p style={{ color: "#8892a4", fontSize: "0.85rem", lineHeight: 1.65 }}>
+      {feature.desc}
+    </p>
+  </div>
+);
+
+const StatCard = ({ stat, index }) => (
+  <div
+    className="lp-stat-card"
+    style={{ textAlign: "center", animationDelay: `${index * 0.1}s` }}
+  >
+    <div
+      style={{
+        fontFamily: "Oswald, sans-serif",
+        fontSize: "2.8rem",
+        fontWeight: 700,
+        color: "#eef0f4",
+        lineHeight: 1,
+        marginBottom: "4px",
+      }}
+    >
+      {stat.value}
+      <span style={{ color: "#e63946" }}>{stat.suffix}</span>
+    </div>
+    <div
+      style={{
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: "0.7rem",
+        color: "#4a5260",
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+      }}
+    >
+      {stat.label}
+    </div>
+  </div>
+);
+
 const LandingPage = () => {
   const [scrolled, setScrolled] = useState(false);
   const [tick, setTick] = useState(true);
@@ -285,7 +221,6 @@ const LandingPage = () => {
   };
 
   useEffect(() => {
-    injectStyles();
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     const iv = setInterval(() => setTick((t) => !t), 900);
@@ -769,37 +704,8 @@ const LandingPage = () => {
             flexWrap: "wrap",
           }}
         >
-          {STATS.map((s, i) => (
-            <div
-              key={i}
-              className="lp-stat-card"
-              style={{ textAlign: "center", animationDelay: `${i * 0.1}s` }}
-            >
-              <div
-                style={{
-                  fontFamily: "Oswald, sans-serif",
-                  fontSize: "2.8rem",
-                  fontWeight: 700,
-                  color: "#eef0f4",
-                  lineHeight: 1,
-                  marginBottom: "4px",
-                }}
-              >
-                {s.value}
-                <span style={{ color: "#e63946" }}>{s.suffix}</span>
-              </div>
-              <div
-                style={{
-                  fontFamily: "IBM Plex Mono, monospace",
-                  fontSize: "0.7rem",
-                  color: "#4a5260",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {s.label}
-              </div>
-            </div>
+          {STATS.map((stat, index) => (
+            <StatCard key={stat.label} stat={stat} index={index} />
           ))}
         </div>
       </section>
@@ -807,46 +713,14 @@ const LandingPage = () => {
       {/* ── FEATURES ── */}
       <section id="features" style={{ padding: "100px 40px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "60px" }}>
-            <div
-              style={{
-                display: "inline-block",
-                fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "0.7rem",
-                color: "#e63946",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                marginBottom: "14px",
-                padding: "4px 14px",
-                background: "rgba(230,57,70,0.1)",
-                border: "1px solid rgba(230,57,70,0.25)",
-                borderRadius: 4,
-              }}
-            >
-              Platform Capabilities
-            </div>
-            <h2
-              style={{
-                fontFamily: "Oswald, sans-serif",
-                fontSize: "clamp(2rem, 4vw, 3rem)",
-                fontWeight: 700,
-                marginBottom: "14px",
-              }}
-            >
-              BUILT FOR THE <span style={{ color: "#e63946" }}>FRONTLINE</span>
-            </h2>
-            <p
-              style={{
-                color: "#8892a4",
-                maxWidth: "500px",
-                margin: "0 auto",
-                lineHeight: 1.7,
-              }}
-            >
-              Every feature is purpose-built for high-stakes, time-critical
-              disaster response operations.
-            </p>
-          </div>
+          <SectionHeader
+            eyebrow="Platform Capabilities"
+            title="BUILT FOR THE"
+            highlight="FRONTLINE"
+          >
+            Every feature is purpose-built for high-stakes, time-critical
+            disaster response operations.
+          </SectionHeader>
 
           <div
             style={{
@@ -855,33 +729,8 @@ const LandingPage = () => {
               gap: "16px",
             }}
           >
-            {FEATURES.map((f, i) => (
-              <div key={i} className="lp-feature-card">
-                <div style={{ fontSize: "1.8rem", marginBottom: "14px" }}>
-                  {f.icon}
-                </div>
-                <div
-                  style={{
-                    fontFamily: "Oswald, sans-serif",
-                    fontSize: "1.05rem",
-                    fontWeight: 600,
-                    letterSpacing: "0.03em",
-                    marginBottom: "8px",
-                    color: "#eef0f4",
-                  }}
-                >
-                  {f.title}
-                </div>
-                <p
-                  style={{
-                    color: "#8892a4",
-                    fontSize: "0.85rem",
-                    lineHeight: 1.65,
-                  }}
-                >
-                  {f.desc}
-                </p>
-              </div>
+            {FEATURES.map((feature) => (
+              <FeatureCard key={feature.title} feature={feature} />
             ))}
           </div>
         </div>
@@ -917,48 +766,14 @@ const LandingPage = () => {
             zIndex: 1,
           }}
         >
-          {/* Header */}
-          <div style={{ textAlign: "center", marginBottom: "72px" }}>
-            <div
-              style={{
-                display: "inline-block",
-                fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "0.7rem",
-                color: "#e63946",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                marginBottom: "14px",
-                padding: "4px 14px",
-                background: "rgba(230,57,70,0.1)",
-                border: "1px solid rgba(230,57,70,0.25)",
-                borderRadius: 4,
-              }}
-            >
-              Response Pipeline
-            </div>
-            <h2
-              style={{
-                fontFamily: "Oswald, sans-serif",
-                fontSize: "clamp(2rem, 4vw, 3rem)",
-                fontWeight: 700,
-                marginBottom: "14px",
-              }}
-            >
-              HOW IT <span style={{ color: "#e63946" }}>WORKS</span>
-            </h2>
-            <p
-              style={{
-                color: "#8892a4",
-                maxWidth: "480px",
-                margin: "0 auto",
-                lineHeight: 1.7,
-                fontSize: "0.95rem",
-              }}
-            >
-              From the moment disaster strikes to full resolution — every step
-              tracked, assigned, and logged.
-            </p>
-          </div>
+          <SectionHeader
+            eyebrow="Response Pipeline"
+            title="HOW IT"
+            highlight="WORKS"
+          >
+            From the moment disaster strikes to full resolution — every step
+            tracked, assigned, and logged.
+          </SectionHeader>
 
           {/* Steps */}
           <div
@@ -996,8 +811,8 @@ const LandingPage = () => {
                 num: "02",
                 icon: "⚡",
                 color: "#3498db",
-                title: "AUTO-DISPATCH",
-                desc: "The system instantly finds the nearest available volunteer within a 50 km radius using geospatial matching.",
+                title: "VOLUNTEER DISPATCH",
+                desc: "The system notifies the nearest available volunteers within a 50 km radius using geospatial matching.",
               },
               {
                 num: "03",
@@ -1082,152 +897,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section
-        style={{
-          padding: "100px 40px",
-          borderTop: "1px solid #2a2f3a",
-          background: "#0e1117",
-        }}
-      >
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "60px" }}>
-            <div
-              style={{
-                display: "inline-block",
-                fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "0.7rem",
-                color: "#e63946",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                marginBottom: "14px",
-                padding: "4px 14px",
-                background: "rgba(230,57,70,0.1)",
-                border: "1px solid rgba(230,57,70,0.25)",
-                borderRadius: 4,
-              }}
-            >
-              In Their Words
-            </div>
-            <h2
-              style={{
-                fontFamily: "Oswald, sans-serif",
-                fontSize: "clamp(2rem, 4vw, 3rem)",
-                fontWeight: 700,
-              }}
-            >
-              REAL IMPACT, <span style={{ color: "#e63946" }}>REAL PEOPLE</span>
-            </h2>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "18px",
-            }}
-          >
-            {[
-              {
-                quote:
-                  "I sent an SOS and a volunteer was at my door in 18 minutes. The GPS was automatic — I just had to describe my situation.",
-                name: "Fatima R.",
-                roleTag: "Victim",
-                role: "Flood Survivor",
-                color: "#e63946",
-                emoji: "🆘",
-              },
-              {
-                quote:
-                  "The map shows exactly where I'm needed. I accepted a mission, got navigation, and helped a family of five reach safety.",
-                name: "Karim H.",
-                roleTag: "Volunteer",
-                role: "Field Responder",
-                color: "#3498db",
-                emoji: "🙋",
-              },
-              {
-                quote:
-                  "Before this, I managed supplies on paper. Now I see live inventory, who received what, and where every unit went.",
-                name: "Nadia S.",
-                roleTag: "NGO",
-                role: "Relief Coordinator",
-                color: "#2ecc71",
-                emoji: "🏕️",
-              },
-            ].map((t, i) => (
-              <div key={i} className="lp-testimonial-card">
-                <div
-                  style={{
-                    fontFamily: "Oswald, sans-serif",
-                    fontSize: "3.5rem",
-                    color: t.color,
-                    opacity: 0.2,
-                    lineHeight: 1,
-                    marginBottom: "8px",
-                  }}
-                >
-                  "
-                </div>
-                <p
-                  style={{
-                    color: "#8892a4",
-                    fontSize: "0.9rem",
-                    lineHeight: 1.75,
-                    marginBottom: "28px",
-                    flex: 1,
-                  }}
-                >
-                  {t.quote}
-                </p>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
-                >
-                  <div
-                    style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: "50%",
-                      background: `${t.color}1a`,
-                      border: `1px solid ${t.color}50`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "1.1rem",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {t.emoji}
-                  </div>
-                  <div>
-                    <div
-                      style={{
-                        fontFamily: "Oswald, sans-serif",
-                        fontSize: "0.95rem",
-                        fontWeight: 600,
-                        color: "#eef0f4",
-                      }}
-                    >
-                      {t.name}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "IBM Plex Mono, monospace",
-                        fontSize: "0.63rem",
-                        color: t.color,
-                        letterSpacing: "0.06em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {t.roleTag} · {t.role}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── WHERE DO YOU FIT IN (Split CTA) ── */}
       <section
@@ -1263,45 +932,14 @@ const LandingPage = () => {
             zIndex: 1,
           }}
         >
-          {/* Header */}
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <div
-              style={{
-                display: "inline-block",
-                fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "0.7rem",
-                color: "#e63946",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                marginBottom: "14px",
-                padding: "4px 14px",
-                background: "rgba(230,57,70,0.1)",
-                border: "1px solid rgba(230,57,70,0.25)",
-                borderRadius: 4,
-              }}
-            >
-              Get Started
-            </div>
-            <h2
-              style={{
-                fontFamily: "Oswald, sans-serif",
-                fontSize: "clamp(2rem, 4vw, 3rem)",
-                fontWeight: 700,
-              }}
-            >
-              WHERE DO YOU <span style={{ color: "#e63946" }}>FIT IN?</span>
-            </h2>
-            <p
-              style={{
-                color: "#8892a4",
-                marginTop: "12px",
-                fontSize: "0.95rem",
-                lineHeight: 1.7,
-              }}
-            >
-              Every role matters. Pick yours and join the network.
-            </p>
-          </div>
+          <SectionHeader
+            eyebrow="Get Started"
+            title="WHERE DO YOU"
+            highlight="FIT IN?"
+            compact
+          >
+            Every role matters. Pick yours and join the network.
+          </SectionHeader>
 
           {/* Two cards */}
           <div

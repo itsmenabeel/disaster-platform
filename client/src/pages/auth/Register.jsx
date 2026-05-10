@@ -179,7 +179,6 @@ const ROLES = [
   { value: 'victim',    emoji: '🆘', name: 'Victim',    desc: 'Request rescue & aid' },
   { value: 'volunteer', emoji: '🙋', name: 'Volunteer',  desc: 'Respond to requests' },
   { value: 'ngo',       emoji: '🏕️', name: 'NGO',        desc: 'Manage resources' },
-  { value: 'admin',     emoji: '🛡️', name: 'Admin',      desc: 'System oversight' },
 ];
 
 const Register = () => {

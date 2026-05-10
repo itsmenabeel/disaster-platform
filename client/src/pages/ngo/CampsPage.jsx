@@ -585,6 +585,9 @@ const CampsPage = () => {
               <Link to="/ngo/camps" style={styles.navLink(true)}>
                 Camps
               </Link>
+              <Link to="/ngo/distribution" style={styles.navLink(false)}>
+                Distribution
+              </Link>
             </div>
           </div>
         </div>

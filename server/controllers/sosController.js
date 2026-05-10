@@ -3,7 +3,7 @@ const Task = require("../models/Task");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
 
-// @desc    Create SOS request (auto-assigns nearest available volunteer)
+// @desc    Create SOS request
 // @route   POST /api/sos
 // @access  Private (victim)
 const createSOS = async (req, res) => {
@@ -18,28 +18,6 @@ const createSOS = async (req, res) => {
 			location: { type: "Point", coordinates },
 			address,
 		});
-
-		// Smart task allocation: find nearest available volunteer using $near
-		const nearestVolunteer = await User.findOne({
-			role: "volunteer",
-			isAvailable: true,
-			location: {
-				$near: {
-					$geometry: { type: "Point", coordinates },
-					$maxDistance: 50000, // 50km radius
-				},
-			},
-		});
-
-		if (nearestVolunteer) {
-			await Task.create({
-				sosRequest: sosRequest._id,
-				volunteer: nearestVolunteer._id,
-			});
-			sosRequest.assignedVolunteer = nearestVolunteer._id;
-			sosRequest.status = "assigned";
-			await sosRequest.save();
-		}
 
 		res.status(201).json({ success: true, data: sosRequest });
 	} catch (error) {
@@ -351,7 +329,6 @@ const updateSOS = async (req, res) => {
 			});
 		}
 
-		// --- Apply field updates ---
 		if (Array.isArray(needs) && needs.length > 0) sosRequest.needs = needs;
 		if (description !== undefined) sosRequest.description = description;
 		if (address !== undefined) sosRequest.address = address;
@@ -371,35 +348,6 @@ const updateSOS = async (req, res) => {
 		}
 
 		await sosRequest.save();
-
-		// If coordinates changed and the request is still pending, try to
-		// auto-assign the nearest available volunteer at the new location.
-		if (
-			Array.isArray(coordinates) &&
-			coordinates.length === 2 &&
-			sosRequest.status === "pending"
-		) {
-			const nearestVolunteer = await User.findOne({
-				role: "volunteer",
-				isAvailable: true,
-				location: {
-					$near: {
-						$geometry: { type: "Point", coordinates },
-						$maxDistance: 50000,
-					},
-				},
-			});
-
-			if (nearestVolunteer) {
-				await Task.create({
-					sosRequest: sosRequest._id,
-					volunteer: nearestVolunteer._id,
-				});
-				sosRequest.assignedVolunteer = nearestVolunteer._id;
-				sosRequest.status = "assigned";
-				await sosRequest.save();
-			}
-		}
 
 		// If a volunteer is already assigned, notify them of the changes
 		// so they can review the updated details before heading out.

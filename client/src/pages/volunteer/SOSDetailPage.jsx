@@ -4,6 +4,7 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import NavTopBar from "../../components/NavTopBar";
 import HeaderTag from "../../components/HeaderTag";
+import MediaCard from "../../components/Mediacard";
 
 /* ── Static config (same as NearbyMap) ── */
 const NEED_EMOJIS = {
@@ -498,47 +499,7 @@ const SOSDetailPage = () => {
           )}
 
           {/* ── Media card ── */}
-          {sos.media && sos.media.length > 0 && (
-            <div
-              style={{
-                background: "#111318",
-                border: "1px solid #2a2f3a",
-                borderRadius: 10,
-                padding: "20px 22px",
-                marginBottom: 16,
-              }}
-            >
-              <SectionLabel>
-                Media ({sos.media.length} file{sos.media.length > 1 ? "s" : ""})
-              </SectionLabel>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                {sos.media.map((src, i) => (
-                  <a
-                    key={i}
-                    href={`/${src}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ display: "block" }}
-                  >
-                    <img
-                      src={`/${src}`}
-                      alt={`media-${i}`}
-                      style={{
-                        width: 120,
-                        height: 90,
-                        objectFit: "cover",
-                        borderRadius: 6,
-                        border: "1px solid #2a2f3a",
-                      }}
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                      }}
-                    />
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
+          <MediaCard media={sos.media} />
 
           {/* ── Action error inline ── */}
           {actionErr && (
