@@ -5,6 +5,7 @@ import api from "../../services/api";
 
 import NavTopBar from "../../components/NavTopBar";
 import HeaderTag from "../../components/HeaderTag";
+import { Hand, ClipboardList, Map, MessageCircle, Clock } from "lucide-react";
 
 const styles = {
   page: { minHeight: "100vh", background: "var(--bg-base)" },
@@ -227,7 +228,7 @@ const VolunteerDashboard = () => {
         {/* Greeting */}
         <div style={styles.greeting}>
           <div style={styles.greetingTitle}>
-            Hello, {user?.name?.split(" ")[0]} 👋
+            Hello, {user?.name?.split(" ")[0]} <Hand size={20} style={{ display: "inline", verticalAlign: "middle" }} />
           </div>
           <div style={styles.greetingSub}>
             Here's your rescue operations overview.
@@ -264,7 +265,7 @@ const VolunteerDashboard = () => {
           {[
             {
               to: "/volunteer/tasks",
-              icon: "📋",
+              icon: <ClipboardList size={22} />,
               color: "#e63946",
               title: "MY TASKS",
               desc: "Accept, reject, and update your rescue assignments",
@@ -272,7 +273,7 @@ const VolunteerDashboard = () => {
             },
             {
               to: "/volunteer/map",
-              icon: "🗺️",
+              icon: <Map size={22} />,
               color: "#3498db",
               title: "NEARBY MAP",
               desc: "Browse SOS requests near your location",
@@ -297,7 +298,7 @@ const VolunteerDashboard = () => {
                 <div style={{ ...styles.navTitle, color: c.color }}>
                   {c.title}
                   {c.unread && (
-                    <span style={styles.navUnreadBadge}>💬 NEW</span>
+                    <span style={styles.navUnreadBadge}><MessageCircle size={12} style={{ display: "inline", verticalAlign: "middle", marginRight: 3 }} /> NEW</span>
                   )}
                 </div>
                 <div style={styles.navDesc}>{c.desc}</div>
@@ -308,7 +309,7 @@ const VolunteerDashboard = () => {
 
         {/* Recent tasks */}
         <div style={styles.sectionTitle}>
-          🕐 RECENT TASKS
+          <Clock size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> RECENT TASKS
           <span
             style={{
               fontSize: "0.72rem",

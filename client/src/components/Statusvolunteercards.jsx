@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import "../css/TrackRescue.css";
+import { UserCheck, Phone } from "lucide-react";
 
 const StatusVolunteerCards = ({ sos, statusCfg }) => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const StatusVolunteerCards = ({ sos, statusCfg }) => {
                   border: `1px solid ${statusCfg.color}50`,
                 }}
               >
-                🙋
+                <UserCheck size={20} />
               </div>
               <div
                 onClick={() =>
@@ -61,7 +62,7 @@ const StatusVolunteerCards = ({ sos, statusCfg }) => {
                 </div>
                 {sos.assignedVolunteer.phone && (
                   <div className="tr-vol-card__phone">
-                    📞 {sos.assignedVolunteer.phone}
+                    <Phone size={12} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> {sos.assignedVolunteer.phone}
                   </div>
                 )}
               </div>

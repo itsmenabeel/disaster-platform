@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import useMessages from "../hooks/useMessages";
+import { MessageCircle, Lock } from "lucide-react";
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
 const formatTime = (dateStr) =>
@@ -246,7 +247,7 @@ const MessageThread = ({ sosId, isActive }) => {
     <div style={styles.wrapper}>
       {/* Header — turns amber when there are unread messages */}
       <div style={styles.header(hasUnread)}>
-        💬 RESCUE CHAT
+        <MessageCircle size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> RESCUE CHAT
         {hasUnread && <span style={styles.unreadBadge}>NEW</span>}
         {isActive && (
           <span style={styles.liveBadge}>
@@ -324,7 +325,7 @@ const MessageThread = ({ sosId, isActive }) => {
         </form>
       ) : (
         <div style={styles.closedNote}>
-          🔒 This request is resolved — chat is read-only.
+          <Lock size={12} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> This request is resolved — chat is read-only.
         </div>
       )}
     </div>

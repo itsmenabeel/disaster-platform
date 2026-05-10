@@ -19,6 +19,7 @@ import MapLegend from "../../components/Maplegend.jsx";
 import SosTooltip from "../../components/Sostooltip.jsx";
 import NavTopBar from "../../components/NavTopBar.jsx";
 import "../../css/NearbyMap.css";
+import { MapPin } from "lucide-react";
 
 /* ─── Static config ──────────────────────────────────────────────── */
 const PRIORITY = {
@@ -209,7 +210,7 @@ const NearbyMap = () => {
             }
             title="Center map on your location"
           >
-            📍 MY LOCATION
+            <MapPin size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> MY LOCATION
           </button>
         )}
 

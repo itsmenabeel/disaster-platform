@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import { KeyRound } from 'lucide-react';
 
 const styles = {
   page: {
@@ -100,7 +101,7 @@ const ForgotPassword = () => {
       <div style={styles.container}>
         <Link to="/login" style={styles.backLink}>← Back to sign in</Link>
         <div style={styles.card}>
-          <div style={styles.icon}>🔑</div>
+          <div style={styles.icon}><KeyRound size={24} /></div>
           <div style={styles.title}>Forgot Password?</div>
           <div style={styles.desc}>
             Enter your registered email and we'll send you a link to reset your password.

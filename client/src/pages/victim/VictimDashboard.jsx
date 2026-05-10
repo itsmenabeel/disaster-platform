@@ -6,6 +6,7 @@ import NavTopBar from "../../components/NavTopBar";
 import HeaderTag from "../../components/HeaderTag";
 import { sortByPriorityDesc } from "../../utils/priority";
 import "../../css/TrackRescue.css";
+import { Hand, AlertOctagon, Tent, ClipboardList, MailOpen, Pencil, Star } from "lucide-react";
 
 const STATUS_CONFIG = {
   pending: { label: "Pending", color: "#f39c12", bg: "rgba(243,156,18,0.1)" },
@@ -213,7 +214,7 @@ const VictimDashboard = () => {
         <HeaderTag subtitle="⬤ VICTIM — DASHBOARD" />
         <div style={styles.greeting}>
           <div style={styles.greetingTitle}>
-            Hello, {user?.name?.split(" ")[0]} 👋
+            Hello, {user?.name?.split(" ")[0]} <Hand size={20} style={{ display: "inline", verticalAlign: "middle", marginLeft: 6 }} />
           </div>
           <div style={styles.greetingSub}>
             Manage your emergency requests below.
@@ -236,7 +237,7 @@ const VictimDashboard = () => {
             }}
           >
             <div style={styles.sosLeft}>
-              <div style={styles.sosTitle}>🆘 SEND SOS REQUEST</div>
+              <div style={styles.sosTitle}><><AlertOctagon size={16} style={{ display: "inline", verticalAlign: "middle", marginRight: 8 }} /> SEND SOS REQUEST</></div>
               <div style={styles.sosDesc}>
                 Tap here to request emergency rescue and aid
               </div>
@@ -261,7 +262,7 @@ const VictimDashboard = () => {
             }}
           >
             <div style={styles.sosLeft}>
-              <div style={styles.sosTitle}>⛺ NEARBY RELIEF CAMPS</div>
+              <div style={styles.sosTitle}><><Tent size={16} style={{ display: "inline", verticalAlign: "middle", marginRight: 8 }} /> NEARBY RELIEF CAMPS</></div>
               <div style={styles.sosDesc}>
                 Find the nearest relief camps, shelters and aid distribution
                 points
@@ -274,7 +275,7 @@ const VictimDashboard = () => {
 
         {/* Request History */}
         <div style={styles.sectionTitle}>
-          📋 Your Requests
+          <><ClipboardList size={16} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> Your Requests</>
           <span
             style={{
               fontSize: "0.78rem",
@@ -293,7 +294,7 @@ const VictimDashboard = () => {
           </div>
         ) : requests.length === 0 ? (
           <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>📭</div>
+            <div style={styles.emptyIcon}><MailOpen size={32} /></div>
             <div style={styles.emptyText}>
               No requests yet. Use the SOS button above when you need help.
             </div>
@@ -330,7 +331,7 @@ const VictimDashboard = () => {
                     style={styles.editBtn}
                     onClick={() => navigate(`/victim/sos/edit/${req._id}`)}
                   >
-                    ✏ EDIT
+                    <><Pencil size={12} style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} /> EDIT</>
                   </button>
                 </div>
               ) : (
@@ -355,7 +356,7 @@ const VictimDashboard = () => {
                     cursor: req.assignedVolunteer ? "pointer" : "not-allowed",
                   }}
                 >
-                  ⭐ Rate Volunteer
+                  <><Star size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} /> Rate Volunteer</>
                 </button>
               )}
             </div>

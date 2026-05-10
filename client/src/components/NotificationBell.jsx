@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import api from "../services/api";
+import { Bell } from "lucide-react";
 
 const styles = {
   shell: {
@@ -166,7 +167,7 @@ const NotificationBell = ({ user }) => {
   return (
     <div style={styles.shell} ref={rootRef}>
       <button type="button" style={styles.trigger} onClick={toggleOpen} title="Notifications">
-        <span aria-hidden="true">🔔</span>
+        <Bell size={18} aria-hidden="true" />
         {unreadIds.length > 0 && <span style={styles.badge}>{unreadIds.length}</span>}
       </button>
 

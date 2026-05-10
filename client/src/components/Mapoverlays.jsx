@@ -1,6 +1,7 @@
 // src/components/MapOverlays.jsx
 import React from "react";
 import "../css/NearbyMap.css";
+import { Radio, MapPin, CheckCircle2 } from "lucide-react";
 
 const RADIUS_OPTIONS = [
   { label: "5 km", value: 5000 },
@@ -20,7 +21,7 @@ const MapOverlays = ({
     {/* GPS acquiring */}
     {gpsStatus === "loading" && (
       <div className="nm-overlay">
-        <div className="nm-overlay__icon">📡</div>
+        <div className="nm-overlay__icon"><Radio size={28} /></div>
         <div className="nm-overlay__text">Acquiring GPS signal...</div>
       </div>
     )}
@@ -28,7 +29,7 @@ const MapOverlays = ({
     {/* GPS denied / unavailable */}
     {gpsStatus === "error" && (
       <div className="nm-overlay">
-        <div className="nm-overlay__icon">📍</div>
+        <div className="nm-overlay__icon"><MapPin size={28} /></div>
         <div className="nm-overlay__text nm-overlay__text--error">
           GPS access denied or unavailable.
           <br />
@@ -43,7 +44,7 @@ const MapOverlays = ({
     {/* No results */}
     {gpsStatus === "success" && !fetching && requestCount === 0 && (
       <div className="nm-no-results">
-        <div className="nm-no-results__icon">✅</div>
+        <div className="nm-no-results__icon"><CheckCircle2 size={28} /></div>
         <div className="nm-no-results__title">NO ACTIVE REQUESTS</div>
         <div className="nm-no-results__sub">
           No pending SOS within{" "}

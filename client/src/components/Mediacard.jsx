@@ -1,6 +1,7 @@
 // components/MediaCard.jsx
 import React, { useState } from "react";
 import "../css/TrackRescue.css";
+import { ZoomIn, Video, Paperclip } from "lucide-react";
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 
@@ -45,7 +46,7 @@ const ImageItem = ({ src, index }) => {
           className="tr-media-img"
           loading="lazy"
         />
-        <div className="tr-media-thumb-overlay">🔍</div>
+        <div className="tr-media-thumb-overlay"><ZoomIn size={16} /></div>
       </div>
 
       {/* Lightbox */}
@@ -88,7 +89,7 @@ const VideoItem = ({ src, index }) => (
     >
       Your browser does not support the video tag.
     </video>
-    <div className="tr-media-video-label">🎥 Video {index + 1}</div>
+    <div className="tr-media-video-label"><Video size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Video {index + 1}</div>
   </div>
 );
 
@@ -101,7 +102,7 @@ const UnknownItem = ({ src, index }) => (
     rel="noopener noreferrer"
     className="tr-media-unknown"
   >
-    📎 File {index + 1}
+    <Paperclip size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> File {index + 1}
   </a>
 );
 

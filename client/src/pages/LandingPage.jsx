@@ -2,45 +2,49 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../css/LandingPage.css";
+import {
+  AlertOctagon, AlertCircle, MapPin, Map, Tent, Package, Radio, BarChart2, Shield,
+  UserCheck, Waves, Atom, Monitor, Leaf, Lock, Zap, CheckCircle2
+} from "lucide-react";
 
 const FEATURES = [
   {
-    icon: "🆘",
+    icon: <AlertOctagon size={28} />,
     title: "SOS Emergency Requests",
     desc: "Victims send instant help requests with auto-captured GPS coordinates, media uploads, and specific needs — food, medicine, shelter, water.",
   },
   {
-    icon: "📍",
+    icon: <MapPin size={28} />,
     title: "Live Rescue Tracking",
     desc: "Real-time status updates let victims follow their rescue from 'Assigned' through 'On the Way' to 'Rescued' — every step visible.",
   },
   {
-    icon: "🗺️",
+    icon: <Map size={28} />,
     title: "Volunteer Map & Dispatch",
     desc: "Volunteers see nearby SOS requests plotted on a live map. The system auto-assigns the closest available responder using geospatial queries.",
   },
   {
-    icon: "🏕️",
+    icon: <Tent size={28} />,
     title: "Relief Camp Management",
     desc: "NGOs create and manage relief camps, assign volunteers, track capacity, and log aid distribution with full inventory records.",
   },
   {
-    icon: "📦",
+    icon: <Package size={28} />,
     title: "Inventory & Stock Alerts",
     desc: "Full CRUD inventory management with automatic low-stock alerts when supplies drop below threshold — keeping NGOs ahead of shortages.",
   },
   {
-    icon: "📡",
+    icon: <Radio size={28} />,
     title: "Emergency Broadcasts",
     desc: "Admins push system-wide alerts via in-app notifications and email blasts — reaching victims, volunteers, and NGOs simultaneously.",
   },
   {
-    icon: "📊",
+    icon: <BarChart2 size={28} />,
     title: "Analytics Dashboard",
     desc: "Command center analytics: rescue counts, average response times, volunteer activity rankings, and aid distribution by category.",
   },
   {
-    icon: "🛡️",
+    icon: <Shield size={28} />,
     title: "Role-Based Access Control",
     desc: "Four distinct roles — Victim, Volunteer, NGO, Admin — each with scoped permissions and a dedicated portal view.",
   },
@@ -48,7 +52,7 @@ const FEATURES = [
 
 const ROLES = [
   {
-    emoji: "🆘",
+    emoji: <AlertOctagon size={28} />,
     name: "Victim",
     color: "#e63946",
     desc: "Send SOS requests, share your location, specify needs, and track your rescue status in real time.",
@@ -60,7 +64,7 @@ const ROLES = [
     ],
   },
   {
-    emoji: "🙋",
+    emoji: <UserCheck size={28} />,
     name: "Volunteer",
     color: "#3498db",
     desc: "Browse nearby requests on a map, accept missions, navigate to victims, and update your task status.",
@@ -72,7 +76,7 @@ const ROLES = [
     ],
   },
   {
-    emoji: "🏕️",
+    emoji: <Tent size={28} />,
     name: "NGO / Relief Team",
     color: "#2ecc71",
     desc: "Manage supply inventory, operate relief camps, assign volunteers, and track every unit of aid distributed.",
@@ -84,7 +88,7 @@ const ROLES = [
     ],
   },
   {
-    emoji: "🛡️",
+    emoji: <Shield size={28} />,
     name: "Admin",
     color: "#f39c12",
     desc: "Monitor the entire operation from a command dashboard — set priorities, broadcast alerts, generate reports.",
@@ -277,7 +281,7 @@ const LandingPage = () => {
               fontSize: "0.9rem",
             }}
           >
-            🌊
+            <Waves size={18} />
           </div>
           <div>
             <div
@@ -501,7 +505,7 @@ const LandingPage = () => {
 
               <div style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
                 <Link to="/register" className="lp-cta-btn">
-                  🆘 GET STARTED
+                  <AlertOctagon size={16} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> GET STARTED
                 </Link>
                 <a href="#features" className="lp-cta-ghost">
                   SEE FEATURES ↓
@@ -581,7 +585,7 @@ const LandingPage = () => {
                       delay: 0.1,
                     },
                     {
-                      prefix: "⚡",
+                      prefix: <Zap size={12} />,
                       color: "#f39c12",
                       text: "Priority: CRITICAL — dispatching volunteer",
                       delay: 0.2,
@@ -593,13 +597,13 @@ const LandingPage = () => {
                       delay: 0.3,
                     },
                     {
-                      prefix: "📡",
+                      prefix: <Radio size={12} />,
                       color: "#9b59b6",
                       text: "NGO notified — camp_id: CAMP-07 alerted",
                       delay: 0.4,
                     },
                     {
-                      prefix: "📊",
+                      prefix: <BarChart2 size={12} />,
                       color: "#8892a4",
                       text: "Dashboard updated — 12 active requests",
                       delay: 0.5,
@@ -802,28 +806,28 @@ const LandingPage = () => {
             {[
               {
                 num: "01",
-                icon: "🆘",
+                icon: <AlertOctagon size={28} />,
                 color: "#e63946",
                 title: "SEND SOS",
                 desc: "Victim submits a request with auto-captured GPS, needs selection, and optional photo or video evidence.",
               },
               {
                 num: "02",
-                icon: "⚡",
+                icon: <Zap size={28} />,
                 color: "#3498db",
                 title: "VOLUNTEER DISPATCH",
                 desc: "The system notifies the nearest available volunteers within a 50 km radius using geospatial matching.",
               },
               {
                 num: "03",
-                icon: "🚨",
+                icon: <AlertCircle size={28} />,
                 color: "#2ecc71",
                 title: "LIVE RESPONSE",
                 desc: "Volunteer navigates to the victim and pushes real-time status updates visible to all parties.",
               },
               {
                 num: "04",
-                icon: "✅",
+                icon: <CheckCircle2 size={28} />,
                 color: "#f39c12",
                 title: "AID DELIVERED",
                 desc: "NGO logs distribution, volunteer marks the task resolved, and the admin dashboard reflects the closure.",
@@ -951,7 +955,7 @@ const LandingPage = () => {
           >
             {/* Victim card */}
             <div className="lp-cta-card-victim">
-              <div style={{ fontSize: "2.8rem", marginBottom: "20px" }}>🆘</div>
+              <div style={{ fontSize: "2.8rem", marginBottom: "20px" }}><AlertOctagon size={44} /></div>
               <div
                 style={{
                   display: "inline-block",
@@ -1001,13 +1005,13 @@ const LandingPage = () => {
                 className="lp-cta-btn"
                 style={{ width: "fit-content" }}
               >
-                🆘 REQUEST HELP NOW
+                <AlertOctagon size={16} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> REQUEST HELP NOW
               </Link>
             </div>
 
             {/* Responder card */}
             <div className="lp-cta-card-responder">
-              <div style={{ fontSize: "2.8rem", marginBottom: "20px" }}>🙋</div>
+              <div style={{ fontSize: "2.8rem", marginBottom: "20px" }}><UserCheck size={44} /></div>
               <div
                 style={{
                   display: "inline-block",
@@ -1066,7 +1070,7 @@ const LandingPage = () => {
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
-                🙋 JOIN THE NETWORK
+                <UserCheck size={16} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> JOIN THE NETWORK
               </Link>
             </div>
           </div>
@@ -1372,7 +1376,7 @@ const LandingPage = () => {
                     fontSize: "0.9rem",
                   }}
                 >
-                  🌊
+                  <Waves size={18} />
                 </div>
                 <div>
                   <div
@@ -1483,11 +1487,11 @@ const LandingPage = () => {
                 }}
               >
                 {[
-                  { icon: "⚛️", label: "React 18 + Vite" },
-                  { icon: "🖥️", label: "Node.js + Express" },
-                  { icon: "🍃", label: "MongoDB + Mongoose" },
-                  { icon: "🔐", label: "JWT + bcryptjs" },
-                  { icon: "🗺️", label: "Leaflet + OpenStreetMap" },
+                  { icon: <Atom size={16} />, label: "React 18 + Vite" },
+                  { icon: <Monitor size={16} />, label: "Node.js + Express" },
+                  { icon: <Leaf size={16} />, label: "MongoDB + Mongoose" },
+                  { icon: <Lock size={16} />, label: "JWT + bcryptjs" },
+                  { icon: <Map size={16} />, label: "Leaflet + OpenStreetMap" },
                 ].map((t) => (
                   <div
                     key={t.label}

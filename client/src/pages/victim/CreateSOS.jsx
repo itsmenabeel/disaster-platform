@@ -3,14 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import NavTopBar from "../../components/NavTopBar";
+import { Utensils, Pill, Home, Droplets, Shirt, Package, MapPin, Paperclip, Video, AlertOctagon, Info } from "lucide-react";
 
 const NEEDS = [
-  { value: "food", emoji: "🍱", label: "Food" },
-  { value: "medicine", emoji: "💊", label: "Medicine" },
-  { value: "shelter", emoji: "🏠", label: "Shelter" },
-  { value: "water", emoji: "💧", label: "Water" },
-  { value: "clothing", emoji: "👕", label: "Clothing" },
-  { value: "other", emoji: "📦", label: "Other" },
+  { value: "food",      emoji: <Utensils size={20} />,  label: "Food" },
+  { value: "medicine",  emoji: <Pill size={20} />,       label: "Medicine" },
+  { value: "shelter",   emoji: <Home size={20} />,       label: "Shelter" },
+  { value: "water",     emoji: <Droplets size={20} />,   label: "Water" },
+  { value: "clothing",  emoji: <Shirt size={20} />,      label: "Clothing" },
+  { value: "other",     emoji: <Package size={20} />,    label: "Other" },
 ];
 
 const styles = {
@@ -483,7 +484,7 @@ const CreateSOS = () => {
               style={{ display: "flex", flexDirection: "column", gap: "12px" }}
             >
               <div style={styles.gpsBox(gpsStatus)}>
-                <div style={styles.gpsIcon}>📍</div>
+                <div style={styles.gpsIcon}><MapPin size={20} /></div>
                 <div style={styles.gpsInfo}>
                   <div style={styles.gpsTitle(gpsStatus)}>
                     {gpsStatusText[gpsStatus].title}
@@ -551,7 +552,7 @@ const CreateSOS = () => {
             </div>
 
             <label htmlFor="media-upload" style={styles.uploadZone}>
-              <div style={styles.uploadIcon}>📎</div>
+              <div style={styles.uploadIcon}><Paperclip size={20} /></div>
               <div style={styles.uploadText}>
                 Click to select images or videos
               </div>
@@ -579,7 +580,7 @@ const CreateSOS = () => {
                         style={styles.fileThumb}
                       />
                     ) : (
-                      <div style={styles.videoThumb}>🎥</div>
+                      <div style={styles.videoThumb}><Video size={20} /></div>
                     )}
                     <div style={styles.fileMeta}>
                       <div style={styles.fileName}>{file.name}</div>
@@ -608,7 +609,7 @@ const CreateSOS = () => {
               </div>
             )}
             <div style={styles.infoNote}>
-              ℹ️ Once submitted, your request will be immediately visible to
+              <Info size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> Once submitted, your request will be immediately visible to
               nearby volunteers. You will be able to track the rescue status in
               real time.
             </div>
@@ -618,7 +619,7 @@ const CreateSOS = () => {
               disabled={loading}
               style={{ fontSize: "1.05rem", padding: "15px" }}
             >
-              {loading ? "Sending SOS..." : "🆘 SEND EMERGENCY REQUEST"}
+              {loading ? "Sending SOS..." : <><AlertOctagon size={16} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> SEND EMERGENCY REQUEST</>}
             </button>
           </div>
         </form>

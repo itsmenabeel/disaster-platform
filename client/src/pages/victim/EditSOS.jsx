@@ -3,15 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import NavTopBar from "../../components/NavTopBar";
+import { Utensils, Pill, Home, Droplets, Shirt, Package, MapPin, Paperclip, Video, Pencil, Save } from "lucide-react";
 
 /* ─── Static config ──────────────────────────────────────────────── */
 const NEEDS = [
-  { value: "food",      emoji: "🍱", label: "Food"     },
-  { value: "medicine",  emoji: "💊", label: "Medicine"  },
-  { value: "shelter",   emoji: "🏠", label: "Shelter"   },
-  { value: "water",     emoji: "💧", label: "Water"     },
-  { value: "clothing",  emoji: "👕", label: "Clothing"  },
-  { value: "other",     emoji: "📦", label: "Other"     },
+  { value: "food",      emoji: <Utensils size={20} />,  label: "Food"     },
+  { value: "medicine",  emoji: <Pill size={20} />,       label: "Medicine"  },
+  { value: "shelter",   emoji: <Home size={20} />,       label: "Shelter"   },
+  { value: "water",     emoji: <Droplets size={20} />,   label: "Water"     },
+  { value: "clothing",  emoji: <Shirt size={20} />,      label: "Clothing"  },
+  { value: "other",     emoji: <Package size={20} />,    label: "Other"     },
 ];
 
 const RESOLVE_PRESETS = [
@@ -736,7 +737,7 @@ const EditSOS = () => {
       {/* ── Main Content ── */}
       <div style={styles.content}>
         <div style={styles.pageHeader}>
-          <div style={styles.tag}>✏️ EDIT MODE</div>
+          <div style={styles.tag}><Pencil size={12} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} /> EDIT MODE</div>
           <div style={styles.pageTitle}>Edit Your SOS Request</div>
           <div style={styles.pageDesc}>
             Update any details below, then press Save. Your assigned volunteer
@@ -777,7 +778,7 @@ const EditSOS = () => {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={styles.gpsBox(gpsStatus)}>
-                <div style={styles.gpsIcon}>📍</div>
+                <div style={styles.gpsIcon}><MapPin size={20} /></div>
                 <div style={styles.gpsInfo}>
                   <div style={styles.gpsTitle(gpsStatus)}>
                     {gpsStatusText[gpsStatus].title}
@@ -887,7 +888,7 @@ const EditSOS = () => {
                               opacity: isRemoved ? 0.3 : 1,
                             }}
                           >
-                            🎥
+                            <Video size={20} />
                           </div>
                         )}
                         <div style={styles.mediaMeta}>
@@ -911,7 +912,7 @@ const EditSOS = () => {
             {/* ── New file upload ── */}
             {totalMediaCount < 5 && (
               <label htmlFor="media-upload-edit" style={styles.uploadZone}>
-                <div style={styles.uploadIcon}>📎</div>
+                <div style={styles.uploadIcon}><Paperclip size={20} /></div>
                 <div style={styles.uploadText}>Click to add more images or videos</div>
                 <div style={styles.uploadHint}>
                   JPG · PNG · GIF · MP4 · MOV &nbsp;·&nbsp; Max 2 MB each
@@ -953,7 +954,7 @@ const EditSOS = () => {
                         />
                       ) : (
                         <div style={{ ...styles.videoThumb, height: "80px" }}>
-                          🎥
+                          <Video size={20} />
                         </div>
                       )}
                       <div style={styles.fileMeta}>
@@ -1028,7 +1029,7 @@ const EditSOS = () => {
           onClick={handleSave}
           disabled={saving}
         >
-          {saving ? "⟳ SAVING…" : "💾 SAVE CHANGES"}
+          {saving ? "⟳ SAVING…" : <><Save size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> SAVE CHANGES</>}
         </button>
       </div>
 

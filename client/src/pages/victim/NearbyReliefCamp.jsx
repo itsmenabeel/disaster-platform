@@ -20,6 +20,7 @@ import NavTopBar from "../../components/NavTopBar.jsx";
 import Camptooltip from "../../components/Camptooltip.jsx";
 
 import "../../css/NearbyMap.css";
+import { MapPin } from "lucide-react";
 
 /* ─── RecenterMap ────────────────────────────────────────────────── */
 const RecenterMap = ({ center }) => {
@@ -191,7 +192,7 @@ const NearbyReliefCamp = () => {
 						}
 						title="Center map on your location"
 					>
-						📍 MY LOCATION
+						<MapPin size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 6 }} /> MY LOCATION
 					</button>
 				)}
 
