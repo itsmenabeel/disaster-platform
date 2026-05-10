@@ -9,42 +9,42 @@ import {
 
 const FEATURES = [
   {
-    icon: <AlertOctagon size={28} />,
+    icon: <AlertOctagon size={28} color={"#e63946"} />,
     title: "SOS Emergency Requests",
     desc: "Victims send instant help requests with auto-captured GPS coordinates, media uploads, and specific needs — food, medicine, shelter, water.",
   },
   {
-    icon: <MapPin size={28} />,
+    icon: <MapPin size={28} color={"#FFA500"} />,
     title: "Live Rescue Tracking",
     desc: "Real-time status updates let victims follow their rescue from 'Assigned' through 'On the Way' to 'Rescued' — every step visible.",
   },
   {
-    icon: <Map size={28} />,
+    icon: <Map size={28} color={"#55db34ff"} />,
     title: "Volunteer Map & Dispatch",
     desc: "Volunteers see nearby SOS requests plotted on a live map. The system auto-assigns the closest available responder using geospatial queries.",
   },
   {
-    icon: <Tent size={28} />,
+    icon: <Tent size={28} color={"#a39f9fff"} />,
     title: "Relief Camp Management",
     desc: "NGOs create and manage relief camps, assign volunteers, track capacity, and log aid distribution with full inventory records.",
   },
   {
-    icon: <Package size={28} />,
+    icon: <Package size={28} color={"#be8823ff"} />,
     title: "Inventory & Stock Alerts",
     desc: "Full CRUD inventory management with automatic low-stock alerts when supplies drop below threshold — keeping NGOs ahead of shortages.",
   },
   {
-    icon: <Radio size={28} />,
+    icon: <Radio size={28} color={"#1fe6d5ff"} />,
     title: "Emergency Broadcasts",
     desc: "Admins push system-wide alerts via in-app notifications and email blasts — reaching victims, volunteers, and NGOs simultaneously.",
   },
   {
-    icon: <BarChart2 size={28} />,
+    icon: <BarChart2 size={28} color={"#8d32caff"} />,
     title: "Analytics Dashboard",
     desc: "Command center analytics: rescue counts, average response times, volunteer activity rankings, and aid distribution by category.",
   },
   {
-    icon: <Shield size={28} />,
+    icon: <Shield size={28} color={"#1861e9ff"} />,
     title: "Role-Based Access Control",
     desc: "Four distinct roles — Victim, Volunteer, NGO, Admin — each with scoped permissions and a dedicated portal view.",
   },
@@ -806,28 +806,28 @@ const LandingPage = () => {
             {[
               {
                 num: "01",
-                icon: <AlertOctagon size={28} />,
+                icon: <AlertOctagon size={28} color={"#e63946"}/>,
                 color: "#e63946",
                 title: "SEND SOS",
                 desc: "Victim submits a request with auto-captured GPS, needs selection, and optional photo or video evidence.",
               },
               {
                 num: "02",
-                icon: <Zap size={28} />,
+                icon: <Zap size={28} color={"#3498db"}/>,
                 color: "#3498db",
                 title: "VOLUNTEER DISPATCH",
                 desc: "The system notifies the nearest available volunteers within a 50 km radius using geospatial matching.",
               },
               {
                 num: "03",
-                icon: <AlertCircle size={28} />,
+                icon: <AlertCircle size={28} color={"#2ecc71"} />,
                 color: "#2ecc71",
                 title: "LIVE RESPONSE",
                 desc: "Volunteer navigates to the victim and pushes real-time status updates visible to all parties.",
               },
               {
                 num: "04",
-                icon: <CheckCircle2 size={28} />,
+                icon: <CheckCircle2 size={28} color={"#f39c12"} />,
                 color: "#f39c12",
                 title: "AID DELIVERED",
                 desc: "NGO logs distribution, volunteer marks the task resolved, and the admin dashboard reflects the closure.",
@@ -955,7 +955,7 @@ const LandingPage = () => {
           >
             {/* Victim card */}
             <div className="lp-cta-card-victim">
-              <div style={{ fontSize: "2.8rem", marginBottom: "20px" }}><AlertOctagon size={44} /></div>
+              <div style={{ fontSize: "2.8rem", marginBottom: "20px" }}><AlertOctagon size={44} color={"#e63946"} /></div>
               <div
                 style={{
                   display: "inline-block",
@@ -1011,7 +1011,7 @@ const LandingPage = () => {
 
             {/* Responder card */}
             <div className="lp-cta-card-responder">
-              <div style={{ fontSize: "2.8rem", marginBottom: "20px" }}><UserCheck size={44} /></div>
+              <div style={{ fontSize: "2.8rem", marginBottom: "20px" }}><UserCheck size={44} color={"#2ecc71"} /></div>
               <div
                 style={{
                   display: "inline-block",
